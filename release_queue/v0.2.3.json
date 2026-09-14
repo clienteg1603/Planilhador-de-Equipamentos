@@ -1,0 +1,6 @@
+{
+  "version": "0.2.3",
+  "base_version": "0.2.2",
+  "base_asset": "Planilhador_Equipamentos_v0.2.2.zip",
+  "notes": "v0.2.3\n\n- Adiciona filtro por usuário na tela Ver lote.\n- Mostra quantos registros cada pessoa enviou no lote.\n- Adiciona pesquisa por SERIAL, ICCID, senha, operadora ou usuário.\n- Exibe contador de registros filtrados.\n- Mantém os três equipamentos iniciais e as regras de exportação existentes."
+}
