@@ -1,0 +1,17 @@
+TESTE RAPIDO - v0.2.8
+
+1. Atualize para v0.2.8 e abra um lote de teste.
+2. Confirme que a tela mostra claramente equipamento, lote e usuario ativos.
+3. Bipe uma peca completa e confirme:
+   - salvamento automatico;
+   - mensagem de sucesso na propria tela;
+   - contador do usuario e total do lote atualizados;
+   - caixa "Ultima peca" preenchida;
+   - ultima linha destacada na tabela;
+   - foco volta ao primeiro campo.
+4. Digite um valor invalido e confirme que o erro aparece na tela e o foco permanece no campo incorreto.
+5. Use "Editar selecionada" e confirme que a correcao atualiza a tabela e a ultima peca quando aplicavel.
+6. Use "Desfazer ultima peca", confirme a pergunta e verifique se a peca e removida do lote e os contadores diminuem.
+7. Selecione uma ou mais linhas e teste "Excluir selecionada".
+8. Em dois PCs, confirme que a contagem continua sendo atualizada automaticamente sem piscar nem perder foco.
+9. Confirme que os alertas de conflito da v0.2.7 continuam funcionando.
