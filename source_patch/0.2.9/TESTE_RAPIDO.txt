@@ -1,0 +1,11 @@
+TESTE RAPIDO - v0.2.9
+
+1. Abra o Planilhador.
+2. Confirme que a tela Entrar mostra os usuarios ja cadastrados em uma lista.
+3. Selecione um usuario existente e entre.
+4. Feche e abra novamente; confirme que o ultimo usuario daquele PC fica preselecionado.
+5. Clique em Novo usuario e crie um nome novo.
+6. Feche e abra novamente; confirme que o novo usuario aparece na lista.
+7. Tente criar o mesmo nome usando maiusculas/minusculas diferentes ou espacos extras; confirme que o programa seleciona o cadastro existente em vez de duplicar.
+8. Entre com dois usuarios diferentes e confirme que cada um mantem sua propria sequencia de bipagem.
+9. Faça uma bipagem simples e confirme que os contadores, salvamento automatico e protecoes da v0.2.8 continuam funcionando.
