@@ -46,12 +46,19 @@ jobs:
         run: |
           PATCH="source_patch/$VERSION"
           test -d "$PATCH" || (echo "Patch não encontrado: $PATCH" && exit 1)
-          PARTS=("$PATCH"/Planilhador.pyw.part*)
-          if [ ! -e "${PARTS[0]}" ]; then
-            echo "Partes do Planilhador.pyw não encontradas."
-            exit 1
+
+          if [ -f "$PATCH/build_patch.py" ]; then
+            python "$PATCH/build_patch.py"
+          else
+            PARTS=("$PATCH"/Planilhador.pyw.part*)
+            if [ ! -e "${PARTS[0]}" ]; then
+              echo "Partes do Planilhador.pyw não encontradas."
+              exit 1
+            fi
+            cat "${PARTS[@]}" > Planilhador.pyw
           fi
-          cat "${PARTS[@]}" > Planilhador.pyw
+
+          test -f Planilhador.pyw || (echo "Planilhador.pyw não foi gerado" && exit 1)
           python -m py_compile Planilhador.pyw
           if [ -f "$PATCH/config/equipamentos.json" ]; then
             python -m json.tool "$PATCH/config/equipamentos.json" >/dev/null
