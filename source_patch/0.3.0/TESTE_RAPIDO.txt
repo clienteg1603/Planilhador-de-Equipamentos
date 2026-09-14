@@ -1,0 +1,12 @@
+TESTE RÁPIDO - v0.3.0
+
+1. Abra a Central e confirme que a lista de lotes aparece normalmente.
+2. Digite parte de um lote, equipamento, operadora ou status no campo Pesquisar.
+3. Teste os filtros Equipamento e Status.
+4. Clique nos cabeçalhos EQUIPAMENTO, LOTE, REGISTROS, OPERADORA e STATUS e confirme a ordenação crescente/decrescente.
+5. Selecione um lote ABERTO e confirme que Finalizar lote permanece desabilitado até a exportação estar atualizada.
+6. Selecione um lote EXPORTADO / ABERTO e confirme que Finalizar lote fica habilitado.
+7. Selecione um lote com CONFLITO/REVISÃO e confirme que Exportar/Finalizar ficam bloqueados e Conflitos fica habilitado.
+8. Abra Ver lote e teste filtro por usuário, operadora, pesquisa e ordenação das colunas.
+9. Dentro de Ver lote, clique Atualizar dados e confirme que os registros sincronizados aparecem sem fechar a janela.
+10. Confirme que o resumo por funcionário e a contagem Mostrando X de Y estão corretos.
