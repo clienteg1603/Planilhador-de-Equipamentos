@@ -1,0 +1,6 @@
+{
+  "version": "0.2.6",
+  "base_version": "0.2.5",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.2.5.zip",
+  "notes": "v0.2.6 — Etapa 1: bipagem e correção\n\n- Adiciona o botão Editar selecionada na tabela da sessão.\n- Duplo clique em uma peça também abre a edição.\n- SERIAL, ICCID e SENHA podem ser corrigidos; a OPERADORA é recalculada automaticamente pelo ICCID.\n- Toda correção passa novamente por validação de formato, tamanho, prefixo e duplicidade global.\n- A edição é limitada às peças da sessão do próprio usuário e é bloqueada em lote finalizado.\n- Cada correção gera histórico interno com usuário, data/hora, valor anterior e valor novo.\n- Editar ou excluir depois de uma exportação marca o lote como DADOS ALTERADOS APÓS EXPORTAÇÃO.\n- A finalização fica bloqueada até uma nova exportação quando houve alteração após exportar.\n- Mantém salvamento automático por peça, contadores em tempo quase real, lotes abertos e regras das operadoras da v0.2.5."
+}
