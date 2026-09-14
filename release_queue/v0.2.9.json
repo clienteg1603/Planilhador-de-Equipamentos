@@ -1,0 +1,6 @@
+{
+  "version": "0.2.9",
+  "base_version": "0.2.8",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.2.8.zip",
+  "notes": "v0.2.9 — Etapa 4: usuários\n\n- A tela de entrada passa a listar os usuários já cadastrados.\n- O último usuário usado naquele PC fica pré-selecionado na próxima abertura.\n- Adiciona Novo usuário para cadastrar outro funcionário sem digitação repetida.\n- Diferenças apenas de maiúsculas/minúsculas ou espaços extras não criam usuários duplicados.\n- Se um nome equivalente já existir, o cadastro existente é selecionado.\n- Cada usuário continua com sua própria sequência de bipagem por equipamento.\n- Mantém salvamento automático, edição, desfazer última peça, contadores e proteções de conflito/OneDrive das versões anteriores."
+}
