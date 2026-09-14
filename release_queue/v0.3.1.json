@@ -1,0 +1,6 @@
+{
+  "version": "0.3.1",
+  "base_version": "0.3.0",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.3.0.zip",
+  "notes": "v0.3.1 — Etapa 6: exportação\n\n- Adiciona uma tela de conferência antes de gerar as planilhas.\n- Mostra quantidade de registros, operadoras encontradas e os modelos que serão usados.\n- Verifica previamente o modelo Mestre/NF e o modelo de importação de cada operadora.\n- Bloqueia a exportação antes de abrir o Excel quando houver modelo ausente, conflito ou revisão pendente.\n- Informa claramente quando é necessária uma reexportação por alteração dos dados.\n- Registra histórico das exportações com data/hora, usuário, quantidade, pasta e arquivos gerados.\n- Lembra a última pasta usada para exportação neste computador.\n- Adiciona Abrir última pasta na Central.\n- Ao concluir, oferece abrir imediatamente a pasta gerada.\n- Revalida o lote no momento da exportação para evitar usar um estado que mudou após a conferência.\n- Mantém todas as proteções de OneDrive, finalização, usuários, bipagem automática e edição das versões anteriores."
+}
