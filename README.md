@@ -1,0 +1,1 @@
+# Planilhador-de-Equipamentos
