@@ -1,0 +1,17 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.2.9
+
+ETAPA 4 - USUARIOS
+
+- A tela de entrada agora lista os usuarios ja cadastrados.
+- O funcionario seleciona o proprio usuario e entra sem precisar digitar o nome toda vez.
+- O ultimo usuario usado naquele PC fica preselecionado na proxima abertura.
+- O botao "Novo usuario" permite cadastrar outro funcionario.
+- Nomes com diferenca apenas de maiusculas/minusculas ou espacos extras nao geram um segundo cadastro.
+- Cada usuario continua com sua propria sequencia de bipagem por equipamento.
+- Os dados historicos dos lotes continuam identificando o usuario que realizou cada registro.
+- Nao foram adicionadas senhas ou niveis de permissao nesta etapa; o objetivo continua sendo rapidez e identificacao operacional.
+
+ATUALIZACOES
+- Repositorio oficial: clienteg1603/Planilhador-de-Equipamentos
+- O programa verifica a Release mais recente em Configuracoes > Verificar agora.
+- Dados compartilhados, configuracoes locais e modelos existentes sao preservados pela rotina de atualizacao.
