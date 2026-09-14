@@ -1,0 +1,27 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.3.1
+
+ETAPA 6 - EXPORTAÇÃO
+
+- Antes de gerar planilhas, a Central abre uma tela de Conferência de exportação.
+- A conferência mostra equipamento, lote, quantidade de registros, operadoras encontradas e os modelos que serão usados.
+- O modelo Mestre/NF e cada modelo de importação são verificados antes de abrir o Excel.
+- Operadora sem modelo de importação configurado bloqueia a exportação e informa o motivo.
+- Conflitos, revisão de sincronização e alterações pós-finalização continuam bloqueando a exportação.
+- A tela informa se é a primeira exportação, se a última continua compatível ou se é necessária uma reexportação.
+- Cada exportação registra data/hora, usuário, quantidade, pasta e arquivos gerados no histórico do lote.
+- O programa lembra a última pasta usada para exportar neste computador.
+- A Central ganhou o botão Abrir última pasta para o lote selecionado.
+- Ao concluir uma exportação, o programa oferece abrir imediatamente a pasta gerada.
+- A exportação é revalidada no momento da geração para reduzir o risco de usar um estado que mudou depois da conferência.
+- O histórico armazenado no meta do lote mantém as 30 exportações mais recentes.
+
+SEGURANÇA PRESERVADA
+- SERIAL e ICCID continuam sendo gravados como texto nas planilhas.
+- A exportação continua dependendo do Microsoft Excel/pywin32 no Windows.
+- Lotes com conflito ou revisão pendente não podem ser exportados/finalizados.
+- A finalização continua exigindo uma exportação atualizada.
+
+ATUALIZAÇÕES
+- Repositório oficial: clienteg1603/Planilhador-de-Equipamentos
+- O programa verifica a Release mais recente em Configurações > Verificar agora.
+- Dados compartilhados, configurações locais e modelos existentes são preservados pela rotina de atualização.
