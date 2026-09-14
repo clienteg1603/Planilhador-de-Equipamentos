@@ -1,0 +1,6 @@
+{
+  "version": "0.2.5",
+  "base_version": "0.2.4",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.2.4.zip",
+  "notes": "v0.2.5\n\n- Lista os lotes abertos ao selecionar um equipamento, mantendo o campo de lote editável para criação manual.\n- Cada peça completa passa a ser salva automaticamente no lote compartilhado; não é mais necessário apertar Enviar.\n- Mostra três contadores na bipagem: total do usuário, total geral do lote e quantidade desta sessão.\n- Os contadores do usuário e do lote são atualizados silenciosamente a cada 2 segundos, sem reconstruir a tela nem tirar o foco da bipagem.\n- Em outro PC, a contagem muda automaticamente assim que o OneDrive sincroniza a nova peça.\n- Excluir selecionada remove do lote compartilhado uma peça concluída na sessão atual.\n- Mantém as regras de VIVO, CLARO, TIM, QUECTEL e ARQUIA da v0.2.4."
+}
