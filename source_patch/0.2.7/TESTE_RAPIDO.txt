@@ -1,0 +1,16 @@
+TESTE RAPIDO - v0.2.7
+
+1. Atualize os dois PCs para v0.2.7 e confirme que ambos apontam para a mesma pasta compartilhada do OneDrive.
+2. Abra o mesmo equipamento e lote nos dois PCs.
+3. Desconecte ou pause temporariamente a sincronizacao em um dos PCs e tente registrar o mesmo SERIAL ou ICCID nos dois lados.
+4. Reative o OneDrive e aguarde a sincronizacao.
+5. Confirme que o lote passa a mostrar CONFLITO na Central.
+6. Abra Central > Conflitos e confirme que aparecem os dois registros, com usuario, PC de origem e horario.
+7. Confirme que Exportar e Finalizar ficam bloqueados enquanto houver conflito.
+8. Corrija ou exclua apenas o registro incorreto no painel Conflitos e confirme que o alerta desaparece depois da sincronizacao.
+9. Exporte novamente e finalize o lote.
+10. Para testar chegada tardia: com um PC ainda sem receber a finalizacao, registre uma nova peca nele; depois sincronize.
+11. Confirme que o lote finalizado passa a mostrar CONFLITO POS-FINALIZACAO.
+12. Abra Conflitos > Reabrir para corrigir; revise o registro sincronizado e escolha corrigir, excluir ou aceitar.
+13. Confirme que o lote exige nova exportacao e nova finalizacao.
+14. Durante toda a bipagem, confirme que a verificacao automatica nao tira o foco dos campos nem faz a tela piscar.
