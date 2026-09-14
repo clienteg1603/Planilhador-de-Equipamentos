@@ -12,7 +12,9 @@ source = "".join(p.read_text(encoding="utf-8") for p in parts)
 
 def sub_once(pattern: str, replacement: str, label: str) -> None:
     global source
-    source, count = re.subn(pattern, replacement, source, count=1, flags=re.S)
+    # Usa função como replacement para que barras invertidas do código gerado
+    # (por exemplo, \n dentro de strings) não sejam interpretadas pelo re.sub.
+    source, count = re.subn(pattern, lambda _m: replacement, source, count=1, flags=re.S)
     if count != 1:
         raise SystemExit(f"Falha ao aplicar patch: {label} (ocorrências={count})")
 
@@ -21,8 +23,6 @@ source = source.replace('APP_VERSION = "0.2.4"', 'APP_VERSION = "0.2.5"', 1)
 if 'APP_VERSION = "0.2.5"' not in source:
     raise SystemExit("Não foi possível atualizar APP_VERSION")
 
-# Cada peça passa a ser persistida individualmente. Também é possível remover
-# uma peça salva nesta sessão, mantendo o comportamento de correção da tela.
 marker = "\n    def meta_path(self, equipment_key: str, lot: str) -> Path:\n"
 insert = r'''
     def delete_record(self, equipment_key: str, lot: str, username: str, serial: str, iccid: str) -> bool:
@@ -67,14 +67,12 @@ if marker not in source:
     raise SystemExit("Ponto de inserção DataStore não encontrado")
 source = source.replace(marker, "\n" + insert + marker, 1)
 
-# Se um lote exportado perder ou ganhar registros, deve aparecer como alterado.
 source = source.replace(
     'elif last_exp and last_exp < count:\n                    status = "NOVOS DADOS APÓS EXPORTAÇÃO"',
     'elif last_exp and last_exp != count:\n                    status = "DADOS ALTERADOS APÓS EXPORTAÇÃO"',
     1,
 )
 
-# Estado usado pela atualização silenciosa dos contadores.
 source = source.replace(
     '        self.scan_status = tk.StringVar(value="Selecione equipamento e lote para começar.")\n',
     '        self.scan_status = tk.StringVar(value="Selecione equipamento e lote para começar.")\n'
@@ -82,8 +80,6 @@ source = source.replace(
     1,
 )
 
-# Inicia o polling depois que a interface existe. Ele apenas altera StringVars,
-# nunca reconstrói a tela e por isso não provoca efeito de piscar.
 source = source.replace(
     '        self.build_ui()\n        if self.settings.get("verificar_atualizacoes_inicio", True):',
     '        self.build_ui()\n        self.after(1200, self._poll_live_counts)\n        if self.settings.get("verificar_atualizacoes_inicio", True):',
@@ -102,7 +98,6 @@ new_build_scan = r'''    def build_scan_tab(self):
 
         ttk.Label(selector, text="Lote").grid(row=0, column=1, sticky="w")
         self.lot_var = tk.StringVar()
-        # Combobox editável: permite escolher um lote aberto ou digitar um lote novo.
         self.lot_combo = ttk.Combobox(selector, textvariable=self.lot_var, state="normal", width=20)
         self.lot_combo.grid(row=1, column=1, padx=(0, 12), pady=(3, 0), sticky="ew")
         ttk.Button(selector, text="Iniciar / abrir lote", command=self.start_lot).grid(row=1, column=2, padx=(0, 8))
@@ -262,7 +257,6 @@ new_start_lot = r'''    def start_lot(self):
 
         self.current_eq_key = eq_key
         self.current_lot = lot
-        # "Nesta sessão" conta apenas as peças concluídas desde a abertura atual deste lote.
         self.session_records.clear()
         self.refresh_session_table()
         self.prepare_scan_fields()
@@ -293,7 +287,6 @@ new_commit = r'''    def commit_scanned_record(self):
                 self.bell()
                 return
 
-        # A peça completa é salva imediatamente. Não existe mais uma fila aguardando "Enviar".
         try:
             self.store.submit(
                 self.current_eq_key,
@@ -372,7 +365,6 @@ new_delete = r'''    def delete_selected_session(self):
 sub_once(r'    def delete_selected_session\(self\):.*?(?=\n    def send_session\()', new_delete, "delete_selected_session")
 
 new_send = r'''    def send_session(self):
-        # Mantido apenas por compatibilidade com atalhos de versões antigas.
         messagebox.showinfo(
             "Salvamento automático",
             "Nesta versão cada peça é salva automaticamente assim que a bipagem é concluída.",
@@ -380,14 +372,12 @@ new_send = r'''    def send_session(self):
 '''
 sub_once(r'    def send_session\(self\):.*?(?=\n    # ---------------- Central ----------------)', new_send, "send_session")
 
-# A mensagem antiga dizia que havia peças esperando envio; agora elas já estão salvas.
 source = source.replace(
     'messagebox.showwarning("Pasta compartilhada", "Envie ou exclua as peças da sessão antes de trocar a pasta compartilhada.")',
     'messagebox.showwarning("Pasta compartilhada", "Há peças desta sessão já salvas no lote atual. Reinicie o programa antes de trocar a pasta compartilhada.")',
     1,
 )
 
-# Verificações de sanidade do resultado.
 required = [
     'APP_VERSION = "0.2.5"',
     'def refresh_open_lots_for_equipment',
