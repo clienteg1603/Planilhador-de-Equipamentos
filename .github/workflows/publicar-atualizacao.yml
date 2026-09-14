@@ -41,13 +41,18 @@ jobs:
               f.write(meta.get('notes', 'Atualização do Planilhador de Equipamentos'))
           PY
 
-      - name: Validar alteração
+      - name: Reconstruir e validar código alterado
         shell: bash
         run: |
           PATCH="source_patch/$VERSION"
           test -d "$PATCH" || (echo "Patch não encontrado: $PATCH" && exit 1)
-          test -f "$PATCH/Planilhador.pyw" || (echo "Planilhador.pyw não encontrado no patch" && exit 1)
-          python -m py_compile "$PATCH/Planilhador.pyw"
+          PARTS=("$PATCH"/Planilhador.pyw.part*)
+          if [ ! -e "${PARTS[0]}" ]; then
+            echo "Partes do Planilhador.pyw não encontradas."
+            exit 1
+          fi
+          cat "${PARTS[@]}" > Planilhador.pyw
+          python -m py_compile Planilhador.pyw
 
       - name: Montar pacote de atualização
         shell: bash
@@ -64,7 +69,7 @@ jobs:
           if [ "$ROOT" != "$TARGET" ]; then
             mv "$ROOT" "$TARGET"
           fi
-          cp -f "source_patch/$VERSION/Planilhador.pyw" "$TARGET/Planilhador.pyw"
+          cp -f Planilhador.pyw "$TARGET/Planilhador.pyw"
           cp -f "source_patch/$VERSION/LEIA-ME.txt" "$TARGET/LEIA-ME.txt"
           cp -f "source_patch/$VERSION/PUBLICAR_ATUALIZACAO_GITHUB.txt" "$TARGET/PUBLICAR_ATUALIZACAO_GITHUB.txt"
           cp -f "source_patch/$VERSION/TESTE_RAPIDO.txt" "$TARGET/TESTE_RAPIDO.txt"
