@@ -1,0 +1,14 @@
+TESTE RAPIDO - v0.2.3
+
+1. Abra INICIAR.bat.
+2. Entre com um usuario.
+3. Abra a Central e selecione um lote com registros de mais de um usuario.
+4. Clique em Ver lote.
+5. Confirme que aparece o resumo com a quantidade enviada por cada usuario.
+6. No filtro Usuario, selecione uma pessoa e confirme que aparecem apenas os registros dela.
+7. Use Pesquisar para localizar SERIAL, ICCID, senha ou usuario.
+8. Confirme que o contador mostra quantos registros estao sendo exibidos.
+9. Teste separadamente KIT M1N 2.0, ADPlus e M2N.
+10. Exporte um lote e confirme a geracao dos dois arquivos.
+11. Confirme que ICCID permanece texto com 20 digitos.
+12. Finalize o lote e confirme que novas bipagens ficam bloqueadas.
