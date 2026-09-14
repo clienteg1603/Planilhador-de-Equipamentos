@@ -1,0 +1,277 @@
+        messagebox.showinfo("Enviado", f"{sent} registros enviados para {self.equipments[self.current_eq_key]['nome']} — lote {self.current_lot}.\n\nTotal atual: {total}")
+        if self.scan_entries:
+            self.scan_entries[self.scan_sequence[0]].focus_set()
+
+    # ---------------- Central ----------------
+    def build_central_tab(self):
+        toolbar = ttk.Frame(self.tab_central)
+        toolbar.pack(fill="x", pady=(0, 8))
+        ttk.Button(toolbar, text="Atualizar", command=self.refresh_lots).pack(side="left")
+        ttk.Button(toolbar, text="Ver lote", command=self.view_selected_lot).pack(side="left", padx=6)
+        ttk.Button(toolbar, text="Exportar", command=self.export_selected_lot).pack(side="left")
+        ttk.Button(toolbar, text="Finalizar lote", command=self.finalize_selected_lot).pack(side="left", padx=6)
+
+        cols = ("equipamento", "lote", "quantidade", "operadora", "status")
+        self.lots_tree = ttk.Treeview(self.tab_central, columns=cols, show="headings", height=22)
+        headings = {"equipamento":"EQUIPAMENTO", "lote":"LOTE", "quantidade":"REGISTROS", "operadora":"OPERADORA", "status":"STATUS"}
+        widths = {"equipamento":220, "lote":130, "quantidade":100, "operadora":150, "status":270}
+        for c in cols:
+            self.lots_tree.heading(c, text=headings[c])
+            self.lots_tree.column(c, width=widths[c], anchor="center")
+        self.lots_tree.pack(fill="both", expand=True)
+        self.lots_tree.bind("<Double-1>", lambda e: self.view_selected_lot())
+
+    def refresh_lots(self):
+        if not hasattr(self, "lots_tree"):
+            return
+        self.lots_tree.delete(*self.lots_tree.get_children())
+        self.lot_index = {}
+        for idx, info in enumerate(self.store.list_lots(self.equipments)):
+            iid = str(idx)
+            self.lot_index[iid] = info
+            self.lots_tree.insert("", "end", iid=iid, values=(
+                info.equipment_name, info.lot, info.count, ", ".join(info.operators) or "—", info.status
+            ))
+
+    def selected_lot_info(self) -> LotInfo | None:
+        sel = self.lots_tree.selection()
+        if not sel:
+            messagebox.showinfo("Central", "Selecione um lote.")
+            return None
+        return self.lot_index.get(sel[0])
+
+    def view_selected_lot(self):
+        info = self.selected_lot_info()
+        if not info:
+            return
+        records = self.store.load_records(info.equipment_key, info.lot)
+        win = tk.Toplevel(self)
+        win.title(f"{info.equipment_name} — Lote {info.lot}")
+        win.geometry("1100x620")
+        win.minsize(900, 500)
+
+        # Cabeçalho com total do lote.
+        header_var = tk.StringVar()
+        ttk.Label(win, textvariable=header_var, font=("Segoe UI", 13, "bold")).pack(
+            anchor="w", padx=12, pady=(12, 6)
+        )
+
+        # Filtros: usuário + pesquisa livre por qualquer campo visível.
+        filters = ttk.Frame(win)
+        filters.pack(fill="x", padx=12, pady=(0, 6))
+
+        users = sorted({str(r.get("_usuario") or "").strip() for r in records if str(r.get("_usuario") or "").strip()}, key=str.casefold)
+        user_var = tk.StringVar(value="Todos")
+        search_var = tk.StringVar()
+        count_var = tk.StringVar()
+
+        ttk.Label(filters, text="Usuário:").pack(side="left")
+        user_combo = ttk.Combobox(filters, textvariable=user_var, values=["Todos", *users], state="readonly", width=20)
+        user_combo.pack(side="left", padx=(6, 16))
+
+        ttk.Label(filters, text="Pesquisar:").pack(side="left")
+        search_entry = ttk.Entry(filters, textvariable=search_var, width=32)
+        search_entry.pack(side="left", padx=(6, 8))
+        ttk.Label(filters, text="SERIAL, ICCID, senha ou usuário", foreground="#666666").pack(side="left")
+
+        ttk.Label(filters, textvariable=count_var, font=("Segoe UI", 10, "bold")).pack(side="right")
+
+        summary_var = tk.StringVar()
+        ttk.Label(win, textvariable=summary_var).pack(anchor="w", padx=12, pady=(0, 8))
+
+        cols = ("SERIAL", "ICCID", "OPERADORA", "SENHA", "USUARIO")
+        table_frame = ttk.Frame(win)
+        table_frame.pack(fill="both", expand=True, padx=12, pady=(0, 12))
+        tree = ttk.Treeview(table_frame, columns=cols, show="headings")
+        scroll_y = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
+        tree.configure(yscrollcommand=scroll_y.set)
+        tree.pack(side="left", fill="both", expand=True)
+        scroll_y.pack(side="right", fill="y")
+
+        for c in cols:
+            tree.heading(c, text=c)
+            tree.column(c, width=215 if c == "ICCID" else 155, anchor="center")
+
+        # Resumo fixo do lote por usuário.
+        user_counts = {}
+        for r in records:
+            u = str(r.get("_usuario") or "Sem usuário").strip() or "Sem usuário"
+            user_counts[u] = user_counts.get(u, 0) + 1
+        if user_counts:
+            parts = [f"{u}: {user_counts[u]}" for u in sorted(user_counts, key=str.casefold)]
+            summary_var.set("Resumo por usuário — " + "  |  ".join(parts))
+        else:
+            summary_var.set("Resumo por usuário — nenhum registro")
+
+        def matches_record(r):
+            selected_user = user_var.get().strip()
+            record_user = str(r.get("_usuario") or "").strip()
+            if selected_user and selected_user != "Todos" and record_user != selected_user:
+                return False
+            q = search_var.get().strip().casefold()
+            if not q:
+                return True
+            haystack = " ".join(str(r.get(k) or "") for k in ("SERIAL", "ICCID", "OPERADORA", "SENHA", "_usuario")).casefold()
+            return q in haystack
+
+        def refresh_detail_view(*_):
+            tree.delete(*tree.get_children())
+            filtered = [r for r in records if matches_record(r)]
+            for r in filtered:
+                tree.insert("", "end", values=(
+                    r.get("SERIAL"), r.get("ICCID"), r.get("OPERADORA"), r.get("SENHA"), r.get("_usuario")
+                ))
+
+            total = len(records)
+            shown = len(filtered)
+            selected_user = user_var.get().strip()
+            header_var.set(f"{info.equipment_name} — Lote {info.lot} — {total} registros")
+            if selected_user and selected_user != "Todos":
+                user_total = sum(1 for r in records if str(r.get("_usuario") or "").strip() == selected_user)
+                count_var.set(f"{selected_user}: {user_total}  •  mostrando {shown} de {total}")
+            else:
+                count_var.set(f"Mostrando {shown} de {total} registros")
+
+        user_combo.bind("<<ComboboxSelected>>", refresh_detail_view)
+        search_var.trace_add("write", refresh_detail_view)
+        refresh_detail_view()
+        search_entry.focus_set()
+
+    def export_selected_lot(self):
+        info = self.selected_lot_info()
+        if not info:
+            return
+        records = self.store.load_records(info.equipment_key, info.lot)
+        if not records:
+            messagebox.showwarning("Exportar", "O lote está vazio.")
+            return
+        dup = self.store.duplicate_messages([], records)
+        if dup:
+            messagebox.showerror("Exportação bloqueada", "Há duplicidades no lote:\n\n" + "\n".join(dup))
+            return
+        destination = filedialog.askdirectory(title="Escolha a pasta onde serão salvas as planilhas")
+        if not destination:
+            return
+        try:
+            with self.store.lot_lock(info.equipment_key, info.lot):
+                # Recarrega sob lock para exportar exatamente o estado atual.
+                records = self.store.load_records(info.equipment_key, info.lot)
+                exporter = ExcelExporter(self.base_dir, self.equipments[info.equipment_key])
+                files = exporter.export(info.lot, records, Path(destination))
+                self.store.mark_exported(info.equipment_key, info.lot, len(records), [str(p) for p in files])
+        except Exception as e:
+            messagebox.showerror("Falha na exportação", str(e))
+            return
+        self.refresh_lots()
+        names = "\n".join(f"• {p.name}" for p in files)
+        messagebox.showinfo("Exportação concluída", f"Arquivos gerados:\n\n{names}")
+        if not info.finalized:
+            if messagebox.askyesno("Finalizar lote", "Deseja finalizar este lote agora?\n\nDepois de finalizado, nenhum PC poderá adicionar novas peças."):
+                self._finalize(info)
+
+    def finalize_selected_lot(self):
+        info = self.selected_lot_info()
+        if not info:
+            return
+        if info.finalized:
+            messagebox.showinfo("Finalizar", "Este lote já está finalizado.")
+            return
+        if not messagebox.askyesno("Finalizar lote", f"Finalizar {info.equipment_name} — lote {info.lot}?\n\nNovas bipagens serão bloqueadas."):
+            return
+        self._finalize(info)
+
+    def _finalize(self, info: LotInfo):
+        try:
+            self.store.finalize(info.equipment_key, info.lot, self.username)
+        except (ValueError, TimeoutError, OSError) as e:
+            messagebox.showerror("Não foi possível finalizar", str(e))
+            self.refresh_lots()
+            return
+        self.refresh_lots()
+        messagebox.showinfo("Lote finalizado", f"{info.equipment_name} — lote {info.lot} foi finalizado e está bloqueado para novos registros.")
+
+    # ---------------- Configurações ----------------
+    def build_settings_tab(self):
+        box = ttk.LabelFrame(self.tab_settings, text="Pasta compartilhada", padding=14)
+        box.pack(fill="x")
+        ttk.Label(box, text="Todos os PCs devem apontar para a mesma pasta de rede.").grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 8))
+        self.shared_var = tk.StringVar(value=str(self.shared_path))
+        ttk.Entry(box, textvariable=self.shared_var).grid(row=1, column=0, sticky="ew", padx=(0, 8))
+        ttk.Button(box, text="Procurar...", command=self.browse_shared).grid(row=1, column=1, padx=(0, 8))
+        ttk.Button(box, text="Aplicar", command=self.apply_shared).grid(row=1, column=2)
+        box.columnconfigure(0, weight=1)
+
+        updates = ttk.LabelFrame(self.tab_settings, text="Atualizações pelo GitHub", padding=14)
+        updates.pack(fill="x", pady=(14, 0))
+        ttk.Label(
+            updates,
+            text="O endereço oficial já vem configurado. O programa consulta as Releases públicas e instala somente o pacote de atualização, preservando modelos, dados locais e a pasta compartilhada.",
+            wraplength=900,
+        ).grid(row=0, column=0, columnspan=3, sticky="w", pady=(0, 8))
+        ttk.Label(updates, text="Repositório oficial:", font=("Segoe UI", 9, "bold")).grid(row=1, column=0, sticky="w")
+        ttk.Label(updates, text=OFFICIAL_GITHUB_REPO).grid(row=2, column=0, sticky="w", pady=(2, 8))
+        ttk.Button(updates, text="Verificar agora", command=self.check_updates_manual).grid(row=2, column=2, sticky="e", pady=(2, 8))
+        self.auto_update_var = tk.BooleanVar(value=bool(self.settings.get("verificar_atualizacoes_inicio", True)))
+        ttk.Checkbutton(updates, text="Verificar automaticamente ao abrir o programa", variable=self.auto_update_var, command=self.save_update_settings_silent).grid(row=3, column=0, columnspan=3, sticky="w")
+        self.update_status_var = tk.StringVar(value=f"Versão instalada: {APP_VERSION}")
+        ttk.Label(updates, textvariable=self.update_status_var, font=("Segoe UI", 10, "bold")).grid(row=4, column=0, columnspan=3, sticky="w", pady=(8, 0))
+        updates.columnconfigure(0, weight=1)
+
+        info = ttk.LabelFrame(self.tab_settings, text="Configuração atual", padding=14)
+        info.pack(fill="x", pady=(14, 0))
+        ttk.Label(info, text="Equipamentos configurados: KIT M1N 2.0, ADPlus e M2N.").pack(anchor="w")
+        ttk.Label(info, text="Validações: SERIAL 10 alfanuméricos; ICCID conforme operadora (19 ou 20 dígitos); SENHA 10 alfanuméricos.").pack(anchor="w", pady=3)
+        ttk.Label(info, text="Operadoras: VIVO 8955068; CLARO 8955053; TIM 8955548; QUECTEL 8955132; ARQUIA 8955180.").pack(anchor="w")
+        ttk.Label(info, text="Exportação: modelo NF .xlsx + modelo de importação .xls da operadora configurada; dados gravados como TEXTO.").pack(anchor="w", pady=3)
+
+    def set_update_status(self, text: str):
+        if hasattr(self, "update_status_var"):
+            self.update_status_var.set(text)
+
+    def save_update_settings_silent(self):
+        self.settings.pop("github_repo", None)
+        self.settings["verificar_atualizacoes_inicio"] = bool(self.auto_update_var.get()) if hasattr(self, "auto_update_var") else True
+        self.save_local_settings()
+
+    def save_update_settings(self):
+        self.save_update_settings_silent()
+        self.set_update_status(f"Configuração salva — versão instalada: {APP_VERSION}")
+        return True
+
+    def check_updates_manual(self):
+        self.save_update_settings_silent()
+        self.update_manager.check_async(manual=True)
+
+    def browse_shared(self):
+        p = filedialog.askdirectory(title="Selecione a pasta compartilhada")
+        if p:
+            self.shared_var.set(p)
+
+    def apply_shared(self):
+        p = Path(self.shared_var.get().strip())
+        if not str(p):
+            return
+        try:
+            p.mkdir(parents=True, exist_ok=True)
+            test = p / ".teste_escrita.tmp"
+            test.write_text("ok", encoding="utf-8")
+            test.unlink()
+        except OSError as e:
+            messagebox.showerror("Pasta compartilhada", f"Não foi possível usar esta pasta:\n{e}")
+            return
+        if self.session_records:
+            messagebox.showwarning("Pasta compartilhada", "Envie ou exclua as peças da sessão antes de trocar a pasta compartilhada.")
+            return
+        self.shared_path = p
+        self.store = DataStore(p)
+        self.settings["pasta_compartilhada"] = str(p)
+        self.save_local_settings()
+        self.profile = self.store.load_user(self.username)
+        self.refresh_lots()
+        messagebox.showinfo("Pasta compartilhada", "Pasta aplicada. Use exatamente esta mesma pasta nos outros PCs.")
+
+
+if __name__ == "__main__":
+    app = App()
+    if app.winfo_exists():
+        app.mainloop()
