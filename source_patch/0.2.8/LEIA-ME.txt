@@ -1,0 +1,20 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.2.8
+
+ETAPA 3 - MELHORIA DA TELA DE BIPAGEM
+
+- A tela de Lançamento foi reorganizada para deixar lote, bipagem, contadores, última peça e ações mais fáceis de conferir.
+- O lote ativo mostra equipamento, lote e usuário em uma linha própria.
+- Os contadores de usuário, total do lote e sessão ficam mais destacados.
+- A última peça salva aparece em uma área própria e também fica destacada na tabela.
+- Mensagens de sucesso, informação e erro aparecem na própria tela sem interromper a bipagem com janelas comuns.
+- O foco continua avançando automaticamente conforme a sequência escolhida pelo usuário.
+- Ao terminar a peça, o foco volta para o primeiro campo automaticamente.
+- Foi adicionado o botão "Desfazer última peça", com confirmação antes de remover do lote compartilhado.
+- Editar selecionada e Excluir selecionada continuam disponíveis.
+- A tabela mantém duplo clique para editar uma peça.
+- Conflitos de OneDrive, bloqueios de exportação/finalização e proteções da v0.2.7 permanecem ativos.
+
+ATUALIZACOES
+- Repositorio oficial: clienteg1603/Planilhador-de-Equipamentos
+- O programa verifica a Release mais recente em Configuracoes > Verificar agora.
+- Dados compartilhados, configuracoes locais e modelos existentes sao preservados pela rotina de atualizacao.
