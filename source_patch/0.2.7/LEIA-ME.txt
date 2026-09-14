@@ -1,0 +1,26 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.2.7
+
+ETAPA 2 - SEGURANCA ENTRE PCS / ONEDRIVE
+
+- Cada novo registro salva tambem o PC de origem.
+- O programa detecta automaticamente SERIAL ou ICCID duplicados depois que o OneDrive sincroniza os arquivos dos outros computadores.
+- Lotes com duplicidade passam ao estado CONFLITO.
+- A Central ganhou o botao "Conflitos", que mostra exatamente os registros envolvidos, usuario, PC de origem e horario do envio.
+- Nada e apagado automaticamente: o usuario decide qual registro deve ser corrigido ou excluido.
+- Enquanto houver conflito, a exportacao e a finalizacao ficam bloqueadas.
+- Se dados chegarem ou forem alterados depois que um lote ja foi finalizado, o status muda para CONFLITO POS-FINALIZACAO.
+- Nessa situacao, o painel de conflitos permite reabrir o lote com seguranca, revisar o que chegou atrasado e depois exige nova exportacao e nova finalizacao.
+- Registros que chegaram depois da finalizacao ficam em revisao ate serem corrigidos, excluidos ou aceitos explicitamente.
+- A finalizacao passa a gravar uma fotografia verificavel do lote, incluindo quantidade, fingerprint e assinaturas dos arquivos de envio.
+- Na tela de bipagem, a verificacao em segundo plano continua a cada 2 segundos e passa a avisar quando um conflito aparecer, sem reconstruir a tela nem tirar o foco do leitor.
+
+ETAPA 1 MANTIDA
+- Salvamento automatico por peca.
+- Contagem por usuario, total do lote e sessao.
+- Edicao de peca da sessao e historico de correcoes.
+- Lotes abertos para selecao e criacao manual.
+
+ATUALIZACOES
+- Repositorio oficial: clienteg1603/Planilhador-de-Equipamentos
+- Use Configuracoes > Verificar agora para instalar a versao mais recente.
+- Dados compartilhados, configuracoes locais e modelos existentes sao preservados pela rotina de atualizacao.
