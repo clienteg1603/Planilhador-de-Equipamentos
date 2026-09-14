@@ -1,0 +1,51 @@
+name: Publicar atualização do Planilhador
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "release_queue/**"
+
+permissions:
+  contents: write
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Ler metadados da versão
+        shell: bash
+        run: |
+          META=$(find release_queue -maxdepth 1 -name '*.json' -type f | sort | tail -n 1)
+          if [ -z "$META" ]; then
+            echo "Nenhum metadado de versão encontrado em release_queue."
+            exit 1
+          fi
+          VERSION=$(python -c "import json; print(json.load(open('$META', encoding='utf-8'))['version'])")
+          ASSET=$(python -c "import json; print(json.load(open('$META', encoding='utf-8'))['asset'])")
+          NOTES=$(python -c "import json; print(json.load(open('$META', encoding='utf-8')).get('notes','Atualização do Planilhador de Equipamentos'))")
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "TAG=v$VERSION" >> "$GITHUB_ENV"
+          echo "ASSET=release_queue/$ASSET" >> "$GITHUB_ENV"
+          echo "NOTES=$NOTES" >> "$GITHUB_ENV"
+
+      - name: Conferir pacote
+        shell: bash
+        run: |
+          test -f "$ASSET" || (echo "Pacote não encontrado: $ASSET" && exit 1)
+
+      - name: Criar ou atualizar Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$ASSET" --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$TAG" --title "Planilhador de Equipamentos v$VERSION" --notes "$NOTES" --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" "$ASSET" --repo "$GITHUB_REPOSITORY" --title "Planilhador de Equipamentos v$VERSION" --notes "$NOTES"
+          fi
