@@ -1,0 +1,36 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.2.3
+
+1. Extraia a pasta inteira (instalacao nova) ou atualize pelo proprio programa.
+2. Execute INICIAR.bat.
+3. Em Configuracoes, escolha a mesma pasta compartilhada em todos os PCs.
+
+EQUIPAMENTOS INICIAIS
+- KIT M1N 2.0
+- ADPlus
+- M2N
+
+Todos usam, nesta versao:
+- SERIAL: 10 caracteres alfanumericos
+- ICCID: 20 digitos
+- SENHA: 10 caracteres alfanumericos
+- Operadora identificada automaticamente pelo prefixo do ICCID
+- Sequencia de bipagem salva por usuario e por equipamento
+
+CENTRAL DE LOTES
+- A tela Ver lote possui filtro por usuario.
+- Mostra quantos registros cada usuario enviou para o lote.
+- Possui pesquisa por SERIAL, ICCID, senha, operadora ou usuario.
+- O filtro serve para conferencia dos registros do lote.
+
+EXPORTACAO
+- Cada equipamento gera a planilha Mestre/NF e a planilha de Importacao de chip.
+- O numero da NF nao e preenchido pelo programa; fica em branco para preenchimento manual.
+- SERIAL, ICCID, OPERADORA e SENHA sao gravados como TEXTO.
+- Os modelos dentro do pacote publico foram sanitizados: nao contem os SERIALs/ICCIDs reais usados nos exemplos.
+
+ATUALIZACOES
+- Repositorio oficial: clienteg1603/Planilhador-de-Equipamentos
+- O programa verifica a Release mais recente e prefere o asset:
+  Planilhador_Equipamentos_Update_vX.Y.Z.zip
+- DADOS_COMPARTILHADOS e configuracoes locais sao preservados.
+- Antes de atualizar, e criado backup automatico da versao anterior.
