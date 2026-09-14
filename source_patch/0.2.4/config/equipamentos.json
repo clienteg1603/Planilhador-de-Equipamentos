@@ -1,0 +1,248 @@
+{
+  "KIT_M1N_2_0": {
+    "nome": "KIT M1N 2.0",
+    "campos": [
+      "SERIAL",
+      "ICCID",
+      "SENHA"
+    ],
+    "validacoes": {
+      "SERIAL": {
+        "tipo": "alfanumerico",
+        "tamanho": 10,
+        "maiusculo": true
+      },
+      "ICCID": {
+        "tipo": "digitos",
+        "tamanho": 20
+      },
+      "SENHA": {
+        "tipo": "alfanumerico",
+        "tamanho": 10,
+        "maiusculo": true
+      }
+    },
+    "operadoras_por_prefixo": [
+      {
+        "prefixo": "8955068",
+        "operadora": "VIVO",
+        "tamanho_iccid": 20
+      },
+      {
+        "prefixo": "8955053",
+        "operadora": "CLARO",
+        "tamanho_iccid": 20
+      },
+      {
+        "prefixo": "8955548",
+        "operadora": "TIM",
+        "tamanho_iccid": 20
+      },
+      {
+        "prefixo": "8955132",
+        "operadora": "QUECTEL",
+        "tamanho_iccid": 19
+      },
+      {
+        "prefixo": "8955180",
+        "operadora": "ARQUIA",
+        "tamanho_iccid": 20
+      }
+    ],
+    "exportacoes": {
+      "nf": {
+        "template": "modelos/KIT_M1N_2_0/modelo_nf.xlsx",
+        "nome_saida": "KIT M1N 2.0 - Lote {lote} (NF ).xlsx",
+        "cabecalhos": [
+          "SERIAL",
+          "ICCID",
+          "OPERADORA",
+          "SENHA"
+        ],
+        "limpar_celulas": [
+          "E2"
+        ]
+      },
+      "importacao": {
+        "templates_por_operadora": {
+          "VIVO": "modelos/KIT_M1N_2_0/modelo_importacao_VIVO.xls"
+        },
+        "nome_saida": "KIT M1N 2.0 - Lote {lote} - Importação de chip ({operadora}).xls",
+        "campos_possiveis": [
+          "SERIAL",
+          "ICCID",
+          "OPERADORA",
+          "SENHA"
+        ],
+        "ancoras_modelo": {
+          "SERIAL": "A{10}",
+          "ICCID": "0{20}"
+        }
+      }
+    }
+  },
+  "ADPLUS": {
+    "nome": "ADPlus",
+    "campos": [
+      "SERIAL",
+      "ICCID",
+      "SENHA"
+    ],
+    "validacoes": {
+      "SERIAL": {
+        "tipo": "alfanumerico",
+        "tamanho": 10,
+        "maiusculo": true
+      },
+      "ICCID": {
+        "tipo": "digitos",
+        "tamanho": 20
+      },
+      "SENHA": {
+        "tipo": "alfanumerico",
+        "tamanho": 10,
+        "maiusculo": true
+      }
+    },
+    "operadoras_por_prefixo": [
+      {
+        "prefixo": "8955068",
+        "operadora": "VIVO",
+        "tamanho_iccid": 20
+      },
+      {
+        "prefixo": "8955053",
+        "operadora": "CLARO",
+        "tamanho_iccid": 20
+      },
+      {
+        "prefixo": "8955548",
+        "operadora": "TIM",
+        "tamanho_iccid": 20
+      },
+      {
+        "prefixo": "8955132",
+        "operadora": "QUECTEL",
+        "tamanho_iccid": 19
+      },
+      {
+        "prefixo": "8955180",
+        "operadora": "ARQUIA",
+        "tamanho_iccid": 20
+      }
+    ],
+    "exportacoes": {
+      "nf": {
+        "template": "modelos/ADPLUS/modelo_nf.xlsx",
+        "nome_saida": "ADPlus - Lote {lote} (NF ).xlsx",
+        "cabecalhos": [
+          "SERIAL",
+          "ICCID",
+          "OPERADORA",
+          "SENHA"
+        ],
+        "limpar_celulas": [
+          "E2"
+        ]
+      },
+      "importacao": {
+        "templates_por_operadora": {
+          "VIVO": "modelos/ADPLUS/modelo_importacao_VIVO.xls"
+        },
+        "nome_saida": "ADPlus - Lote {lote} - Importação de chip ({operadora}).xls",
+        "campos_possiveis": [
+          "SERIAL",
+          "ICCID",
+          "OPERADORA",
+          "SENHA"
+        ],
+        "ancoras_modelo": {
+          "SERIAL": "A{10}",
+          "ICCID": "0{20}"
+        }
+      }
+    }
+  },
+  "M2N": {
+    "nome": "M2N",
+    "campos": [
+      "SERIAL",
+      "ICCID",
+      "SENHA"
+    ],
+    "validacoes": {
+      "SERIAL": {
+        "tipo": "alfanumerico",
+        "tamanho": 10,
+        "maiusculo": true
+      },
+      "ICCID": {
+        "tipo": "digitos",
+        "tamanho": 20
+      },
+      "SENHA": {
+        "tipo": "alfanumerico",
+        "tamanho": 10,
+        "maiusculo": true
+      }
+    },
+    "operadoras_por_prefixo": [
+      {
+        "prefixo": "8955068",
+        "operadora": "VIVO",
+        "tamanho_iccid": 20
+      },
+      {
+        "prefixo": "8955053",
+        "operadora": "CLARO",
+        "tamanho_iccid": 20
+      },
+      {
+        "prefixo": "8955548",
+        "operadora": "TIM",
+        "tamanho_iccid": 20
+      },
+      {
+        "prefixo": "8955132",
+        "operadora": "QUECTEL",
+        "tamanho_iccid": 19
+      },
+      {
+        "prefixo": "8955180",
+        "operadora": "ARQUIA",
+        "tamanho_iccid": 20
+      }
+    ],
+    "exportacoes": {
+      "nf": {
+        "template": "modelos/M2N/modelo_nf.xlsx",
+        "nome_saida": "M2N - Lote {lote} (NF ).xlsx",
+        "cabecalhos": [
+          "SERIAL",
+          "ICCID",
+          "OPERADORA",
+          "SENHA"
+        ],
+        "limpar_celulas": [
+          "E2"
+        ]
+      },
+      "importacao": {
+        "templates_por_operadora": {
+          "VIVO": "modelos/M2N/modelo_importacao_VIVO.xls"
+        },
+        "nome_saida": "M2N - Lote {lote} - Importação de chip ({operadora}).xls",
+        "campos_possiveis": [
+          "SERIAL",
+          "ICCID",
+          "OPERADORA",
+          "SENHA"
+        ],
+        "ancoras_modelo": {
+          "SERIAL": "A{10}",
+          "ICCID": "0{20}"
+        }
+      }
+    }
+  }
+}
