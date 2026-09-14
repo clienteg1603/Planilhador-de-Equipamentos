@@ -1,0 +1,14 @@
+TESTE RAPIDO - v0.2.6
+
+1. Atualize para v0.2.6 e abra um lote de teste.
+2. Bipe uma peca valida e confirme que ela aparece na tabela da sessao e nos contadores.
+3. Selecione a linha e clique em "Editar selecionada".
+4. Corrija a SENHA e salve; confirme que a linha muda sem alterar a quantidade do lote.
+5. Edite novamente e altere o ICCID para outro ICCID valido; confirme que a OPERADORA e recalculada automaticamente.
+6. Tente salvar SERIAL ou ICCID duplicado; a correcao deve ser bloqueada.
+7. Tente salvar ICCID com prefixo desconhecido ou tamanho invalido; deve ser bloqueado.
+8. Teste duplo clique na linha para abrir a edicao.
+9. Teste Esc para cancelar e Ctrl+Enter para salvar.
+10. Exporte o lote, depois edite uma peca. A Central deve indicar DADOS ALTERADOS APOS EXPORTACAO e a finalizacao deve ser bloqueada ate nova exportacao.
+11. Reexporte e confirme que a finalizacao volta a ser permitida.
+12. Finalize o lote e confirme que novas edicoes/bipagens ficam bloqueadas.
