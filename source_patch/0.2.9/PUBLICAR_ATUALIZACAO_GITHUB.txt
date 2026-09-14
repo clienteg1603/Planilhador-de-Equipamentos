@@ -1,0 +1,10 @@
+PUBLICACAO AUTOMATICA - v0.2.9
+
+Esta versao e publicada automaticamente pelo workflow oficial do repositorio.
+
+Base do pacote: v0.2.8
+Versao nova: v0.2.9
+
+O workflow reconstrói o Planilhador.pyw, valida a sintaxe, monta o ZIP de atualizacao, gera SHA-256 e publica a GitHub Release.
+
+Nao publicar arquivos com dados reais de producao, SERIAL, ICCID ou SENHA.
