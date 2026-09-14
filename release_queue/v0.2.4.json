@@ -1,0 +1,6 @@
+{
+  "version": "0.2.4",
+  "base_version": "0.2.3",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.2.3.zip",
+  "notes": "v0.2.4\n\n- A sequência de bipagem agora troca automaticamente os campos quando uma posição recebe um item que já estava em outra posição.\n- Cadastra VIVO (8955068), CLARO (8955053), TIM (8955548), QUECTEL (8955132) e ARQUIA (8955180).\n- VIVO, CLARO, TIM e ARQUIA aceitam ICCID de 20 dígitos.\n- QUECTEL aceita ICCID de 19 dígitos.\n- A validação do tamanho do ICCID agora depende da operadora identificada pelo prefixo.\n- Mantém a exportação de importação de chip configurada apenas para VIVO até recebermos os modelos das demais operadoras."
+}
