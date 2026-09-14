@@ -12,6 +12,12 @@ junto do arquivo opcional de integridade:
 
 `Planilhador_Equipamentos_Update_vX.Y.Z.zip.sha256`
 
+A publicação das novas versões é automatizada pelo GitHub Actions.
+
+### Regra do projeto
+
+Sempre que uma nova versão do programa for preparada, ela deve ser **publicada no GitHub** e o usuário deve ser **avisado quando a Release estiver disponível para atualização**.
+
 ## Importante
 
 O pacote completo de instalação **não deve ser publicado aqui**, pois contém os modelos internos de Excel usados pela empresa.
