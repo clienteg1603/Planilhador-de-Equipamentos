@@ -2,6 +2,6 @@
   "version": "0.2.8",
   "base_version": "0.2.7",
   "base_asset": "Planilhador_Equipamentos_Update_v0.2.7.zip",
-  "retry": 2,
+  "retry": 3,
   "notes": "v0.2.8 — Etapa 3: melhoria da tela de bipagem\n\n- Reorganiza a tela de Lançamento para destacar lote ativo, bipagem, contadores, última peça e ações.\n- Mostra equipamento, lote e usuário ativos em uma linha própria.\n- Dá mais destaque aos totais do usuário, lote e sessão.\n- Exibe a última peça salva e destaca sua linha na tabela.\n- Mensagens de sucesso, informação e erro passam a aparecer na própria tela sem interromper a bipagem.\n- Mantém o foco automático na ordem de bipagem e volta ao primeiro campo após salvar.\n- Adiciona Desfazer última peça, com confirmação e remoção segura do lote compartilhado.\n- Melhora Editar selecionada e Excluir selecionada sem alterar as proteções de validação.\n- Mantém toda a segurança de conflitos e sincronização OneDrive da v0.2.7."
 }
