@@ -1,0 +1,34 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.2.4
+
+1. Extraia a pasta inteira (instalacao nova) ou atualize pelo proprio programa.
+2. Execute INICIAR.bat.
+3. Em Configuracoes, escolha a mesma pasta compartilhada em todos os PCs.
+
+EQUIPAMENTOS INICIAIS
+- KIT M1N 2.0
+- ADPlus
+- M2N
+
+VALIDACOES
+- SERIAL: 10 caracteres alfanumericos
+- SENHA: 10 caracteres alfanumericos
+- ICCID identificado automaticamente pelo prefixo:
+  * 8955068 = VIVO, 20 digitos
+  * 8955053 = CLARO, 20 digitos
+  * 8955548 = TIM, 20 digitos
+  * 8955132 = QUECTEL, 19 digitos
+  * 8955180 = ARQUIA, 20 digitos
+- A sequencia de bipagem e salva por usuario e por equipamento.
+- Ao trocar uma posicao da sequencia, o campo repetido troca automaticamente de lugar.
+
+EXPORTACAO
+- Cada equipamento gera a planilha Mestre/NF e a planilha de Importacao de chip quando houver modelo da operadora.
+- Nesta versao, o modelo de importacao configurado continua sendo o da VIVO.
+- O numero da NF nao e preenchido pelo programa; fica em branco para preenchimento manual.
+- SERIAL, ICCID, OPERADORA e SENHA sao gravados como TEXTO.
+
+ATUALIZACOES
+- Repositorio oficial: clienteg1603/Planilhador-de-Equipamentos
+- O programa verifica a Release mais recente e instala o pacote oficial.
+- DADOS_COMPARTILHADOS, configuracoes locais e modelos existentes sao preservados conforme a rotina do atualizador.
+- Antes de atualizar, e criado backup automatico da versao anterior.
