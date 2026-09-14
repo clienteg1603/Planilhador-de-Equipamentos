@@ -1,0 +1,6 @@
+{
+  "version": "0.3.0",
+  "base_version": "0.2.9",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.2.9.zip",
+  "notes": "v0.3.0 — Etapa 5: Central\n\n- A Central ganhou pesquisa geral por equipamento, lote, operadora e status.\n- Adiciona filtros separados por equipamento e grupo de status.\n- Permite ordenar os lotes clicando nos cabeçalhos das colunas.\n- Destaca visualmente lotes ABERTO, EXPORTADO, ALTERADO, CONFLITO, REVISÃO e FINALIZADO.\n- Mostra um resumo com quantidade de lotes por situação e quantidade visível após os filtros.\n- Ver lote, Exportar, Finalizar lote e Conflitos passam a ser habilitados conforme o estado do lote selecionado.\n- Finalização só fica disponível quando a exportação está atualizada e não há pendências.\n- A consulta do lote ganhou filtro por usuário e operadora, pesquisa ampliada, atualização manual e ordenação das colunas.\n- A consulta exibe também PC de origem e horário do envio, mantendo o resumo por funcionário.\n- Preserva todas as proteções de OneDrive, edição, bipagem automática e usuários das versões anteriores."
+}
