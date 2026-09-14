@@ -1,0 +1,355 @@
+            if self.is_finalized(equipment_key, lot):
+                raise ValueError("Este lote já foi finalizado e não aceita novos registros.")
+            existing = self.load_records(equipment_key, lot)
+            dup = self.duplicate_messages(existing, records)
+            if dup:
+                raise ValueError("\n".join(dup))
+            envios = ldir / "envios"
+            envios.mkdir(parents=True, exist_ok=True)
+            payload = {
+                "equipamento": equipment_name,
+                "equipamento_chave": equipment_key,
+                "lote": lot,
+                "usuario": username,
+                "enviado_em": now_iso(),
+                "quantidade": len(records),
+                "registros": records,
+            }
+            fname = datetime.now().strftime("%Y%m%d_%H%M%S_%f") + "_" + uuid.uuid4().hex[:8] + ".json"
+            atomic_json_write(envios / fname, payload)
+            return len(existing) + len(records)
+
+    def meta_path(self, equipment_key: str, lot: str) -> Path:
+        return self.lot_dir(equipment_key, lot) / "meta.json"
+
+    def load_meta(self, equipment_key: str, lot: str) -> dict:
+        return read_json(self.meta_path(equipment_key, lot), {}) or {}
+
+    def mark_exported(self, equipment_key: str, lot: str, count: int, files: list[str]):
+        meta = self.load_meta(equipment_key, lot)
+        meta.update({
+            "ultima_exportacao_em": now_iso(),
+            "ultima_exportacao_quantidade": count,
+            "arquivos": files,
+        })
+        atomic_json_write(self.meta_path(equipment_key, lot), meta)
+
+    def finalize(self, equipment_key: str, lot: str, username: str):
+        with self.lot_lock(equipment_key, lot):
+            if self.is_finalized(equipment_key, lot):
+                return
+            count = len(self.load_records(equipment_key, lot))
+            meta = self.load_meta(equipment_key, lot)
+            if count == 0:
+                raise ValueError("O lote está vazio.")
+            if int(meta.get("ultima_exportacao_quantidade", -1)) != count:
+                raise ValueError(
+                    "O lote mudou desde a última exportação (ou ainda não foi exportado). "
+                    "Exporte novamente antes de finalizar."
+                )
+            atomic_json_write(self.lot_dir(equipment_key, lot) / "finalizado.json", {
+                "finalizado_em": now_iso(),
+                "finalizado_por": username,
+                "quantidade": count,
+            })
+
+    def list_lots(self, equipments: dict) -> list[LotInfo]:
+        result = []
+        base = self.root / "lotes"
+        if not base.exists():
+            return result
+        for eqdir in base.iterdir():
+            if not eqdir.is_dir():
+                continue
+            eqkey = eqdir.name
+            eqcfg = equipments.get(eqkey, {})
+            eqname = eqcfg.get("nome", eqkey)
+            for ldir in eqdir.iterdir():
+                if not ldir.is_dir():
+                    continue
+                lot = ldir.name
+                records = self.load_records(eqkey, lot)
+                meta = self.load_meta(eqkey, lot)
+                finalized = self.is_finalized(eqkey, lot)
+                last_exp = int(meta.get("ultima_exportacao_quantidade", 0) or 0)
+                count = len(records)
+                if finalized:
+                    status = "FINALIZADO"
+                elif last_exp and last_exp == count:
+                    status = "EXPORTADO / ABERTO"
+                elif last_exp and last_exp < count:
+                    status = "NOVOS DADOS APÓS EXPORTAÇÃO"
+                else:
+                    status = "ABERTO"
+                operators = sorted({str(r.get("OPERADORA", "")) for r in records if r.get("OPERADORA")})
+                result.append(LotInfo(eqkey, eqname, lot, count, operators, status, last_exp, finalized))
+        result.sort(key=lambda x: (x.finalized, x.equipment_name, x.lot), reverse=False)
+        return result
+
+
+class ExcelExporter:
+    def __init__(self, base_dir: Path, equipment_cfg: dict):
+        self.base_dir = base_dir
+        self.cfg = equipment_cfg
+
+    def _template(self, rel: str) -> Path:
+        p = self.base_dir / rel
+        if not p.exists():
+            raise FileNotFoundError(f"Modelo não encontrado: {p}")
+        return p
+
+    def export(self, lot: str, records: list[dict], destination: Path) -> list[Path]:
+        if os.name != "nt":
+            raise RuntimeError("A exportação precisa ser executada no Windows com Microsoft Excel instalado.")
+        try:
+            import win32com.client  # type: ignore
+        except Exception as e:
+            raise RuntimeError("O componente pywin32 não está instalado. Execute INSTALAR.bat neste PC.") from e
+
+        destination.mkdir(parents=True, exist_ok=True)
+        exports = self.cfg.get("exportacoes", {})
+        out_files = []
+
+        nf = exports["nf"]
+        nf_template = self._template(nf["template"])
+        nf_out = destination / nf["nome_saida"].format(lote=lot)
+        shutil.copy2(nf_template, nf_out)
+        self._fill_excel_copy(
+            win32com.client, nf_out, records,
+            required_headers=nf.get("cabecalhos", []), anchors=None,
+            clear_cells=nf.get("limpar_celulas", []),
+        )
+        out_files.append(nf_out)
+
+        import_cfg = exports.get("importacao")
+        if import_cfg:
+            by_operator = {}
+            for r in records:
+                op = str(r.get("OPERADORA", "")).strip().upper()
+                by_operator.setdefault(op, []).append(r)
+            template_map = import_cfg.get("templates_por_operadora", {})
+            for op, op_records in sorted(by_operator.items()):
+                if op not in template_map:
+                    raise RuntimeError(
+                        f"Não existe modelo de importação configurado para a operadora {op}. "
+                        "O lote não foi marcado como exportado."
+                    )
+                template = self._template(template_map[op])
+                suffix = template.suffix
+                name_pattern = import_cfg["nome_saida"]
+                # Mantém a extensão real do modelo, inclusive .xls legado.
+                out_name = name_pattern.format(lote=lot, operadora=op)
+                if Path(out_name).suffix.lower() != suffix.lower():
+                    out_name = str(Path(out_name).with_suffix(suffix))
+                out = destination / out_name
+                shutil.copy2(template, out)
+                self._fill_excel_copy(
+                    win32com.client, out, op_records, required_headers=None,
+                    anchors=import_cfg.get("ancoras_modelo"), clear_cells=None,
+                )
+                out_files.append(out)
+        return out_files
+
+    @staticmethod
+    def _fill_excel_copy(win32, workbook_path: Path, records: list[dict], required_headers=None, anchors=None, clear_cells=None):
+        """Preenche uma cópia do modelo sem converter o formato do arquivo.
+
+        Primeiro tenta localizar cabeçalhos conhecidos. Em modelos legados sem cabeçalho simples,
+        usa âncoras (valores existentes no modelo original) para achar exatamente as colunas/blocos
+        a substituir. Cada valor é gravado com NumberFormat='@' para permanecer como TEXTO.
+        """
+        excel = None
+        wb = None
+        try:
+            excel = win32.DispatchEx("Excel.Application")
+            excel.Visible = False
+            excel.DisplayAlerts = False
+            wb = excel.Workbooks.Open(str(workbook_path.resolve()))
+            ws = wb.Worksheets(1)
+
+            # Campos auxiliares existentes no arquivo-modelo (ex.: número de NF)
+            # podem ser limpos antes do preenchimento. O usuário os preenche manualmente.
+            for address in (clear_cells or []):
+                try:
+                    ws.Range(str(address)).ClearContents()
+                    ws.Range(str(address)).NumberFormat = "@"
+                except Exception as exc:
+                    raise RuntimeError(f"Não consegui limpar a célula {address} do modelo {workbook_path.name}: {exc}")
+
+            used = ws.UsedRange
+            first_row = int(used.Row)
+            first_col = int(used.Column)
+            last_row = first_row + int(used.Rows.Count) - 1
+            last_col = first_col + int(used.Columns.Count) - 1
+            scan_last_row = min(last_row, first_row + 60)
+            scan_last_col = min(last_col, first_col + 40)
+
+            known = {"SERIAL", "ICCID", "OPERADORA", "SENHA"}
+            best_row = None
+            best_map = {}
+            for r in range(first_row, scan_last_row + 1):
+                mapping = {}
+                for c in range(first_col, scan_last_col + 1):
+                    h = normalize_header(ws.Cells(r, c).Value2)
+                    if h in known:
+                        mapping[h] = c
+                if len(mapping) > len(best_map):
+                    best_row, best_map = r, mapping
+
+            field_positions = {}  # FIELD -> (column, first_data_row)
+            if best_row and best_map:
+                if required_headers:
+                    missing = [h for h in required_headers if normalize_header(h) not in best_map]
+                    if missing:
+                        raise RuntimeError(f"Cabeçalhos ausentes no modelo {workbook_path.name}: {', '.join(missing)}")
+                for field, col in best_map.items():
+                    field_positions[field] = (col, best_row + 1)
+            elif anchors:
+                # Modelos .xls antigos podem não ter títulos simples. As configurações usam
+                # padrões (regex) em vez de identificadores reais do modelo, evitando carregar
+                # SERIAL/ICCID de produção dentro do código ou dos pacotes públicos de atualização.
+                for field, pattern in anchors.items():
+                    found = None
+                    try:
+                        rx = re.compile(str(pattern))
+                    except re.error as exc:
+                        raise RuntimeError(f"Padrão inválido para {field}: {exc}")
+                    for r in range(first_row, last_row + 1):
+                        for c in range(first_col, last_col + 1):
+                            val = ws.Cells(r, c).Value2
+                            text = "" if val is None else str(val).strip()
+                            if text and rx.fullmatch(text):
+                                found = (c, r)
+                                break
+                        if found:
+                            break
+                    if found:
+                        field_positions[normalize_header(field)] = found
+                if not field_positions:
+                    raise RuntimeError(
+                        f"Não consegui localizar a área de dados no modelo {workbook_path.name}."
+                    )
+            else:
+                raise RuntimeError(
+                    f"Não consegui localizar os cabeçalhos SERIAL/ICCID/OPERADORA/SENHA no modelo {workbook_path.name}."
+                )
+
+            # Em modelos de importação, escrevemos apenas os campos realmente encontrados no modelo.
+            for field, (col, start_row) in field_positions.items():
+                # Descobre até onde vai o bloco atual, sem apagar fórmulas/totais mais distantes.
+                existing_end = start_row - 1
+                blank_run = 0
+                max_probe = min(last_row + 300, 65536)
+                for r in range(start_row, max_probe + 1):
+                    value = ws.Cells(r, col).Value2
+                    if value in (None, ""):
+                        blank_run += 1
+                        if blank_run >= 2:
+                            break
+                    else:
+                        blank_run = 0
+                        existing_end = r
+
+                new_end = start_row + len(records) - 1
+                clear_end = max(existing_end, new_end)
+                if clear_end >= start_row:
+                    ws.Range(ws.Cells(start_row, col), ws.Cells(clear_end, col)).ClearContents()
+
+                # Copia somente o formato da célula-modelo para linhas extras, sem tocar em
+                # fórmulas/colunas vizinhas.
+                xlPasteFormats = -4122
+                source_cell = ws.Cells(start_row, col)
+                for i, rec in enumerate(records):
+                    row = start_row + i
+                    cell = ws.Cells(row, col)
+                    if row > existing_end and row != start_row:
+                        source_cell.Copy()
+                        cell.PasteSpecial(Paste=xlPasteFormats)
+                    cell.NumberFormat = "@"
+                    cell.Value2 = str(rec.get(field, ""))
+                excel.CutCopyMode = False
+
+            wb.Save()
+        finally:
+            if wb is not None:
+                try:
+                    wb.Close(SaveChanges=True)
+                except Exception:
+                    pass
+            if excel is not None:
+                try:
+                    excel.Quit()
+                except Exception:
+                    pass
+
+
+
+class SequenceDialog(tk.Toplevel):
+    def __init__(self, parent, fields: list[str], current: list[str] | None = None):
+        super().__init__(parent)
+        self.title("Sequência de bipagem")
+        self.resizable(False, False)
+        self.transient(parent)
+        self.grab_set()
+        self.result = None
+        current = current if current and set(current) == set(fields) else list(fields)
+
+        ttk.Label(self, text="Escolha a ordem usada neste equipamento:", font=("Segoe UI", 11, "bold")).grid(row=0, column=0, columnspan=2, padx=18, pady=(18, 12))
+        self.vars = []
+        self._sequence_updating = False
+        for i in range(len(fields)):
+            ttk.Label(self, text=f"{i+1}º").grid(row=i+1, column=0, sticky="e", padx=(18, 8), pady=6)
+            var = tk.StringVar(value=current[i])
+            cb = ttk.Combobox(self, textvariable=var, values=fields, state="readonly", width=20)
+            cb.grid(row=i+1, column=1, padx=(0, 18), pady=6)
+            self.vars.append(var)
+        self._last_sequence = [v.get() for v in self.vars]
+        for i, var in enumerate(self.vars):
+            var.trace_add("write", lambda *_args, idx=i: self._swap_duplicate(idx))
+        ttk.Button(self, text="Salvar sequência", command=self.save).grid(row=len(fields)+1, column=0, columnspan=2, pady=18)
+        self.protocol("WM_DELETE_WINDOW", self.cancel)
+        self.wait_visibility()
+        self.focus_force()
+
+    def _swap_duplicate(self, changed_index: int):
+        if self._sequence_updating:
+            return
+        new_value = self.vars[changed_index].get()
+        old_value = self._last_sequence[changed_index]
+        if not new_value or new_value == old_value:
+            self._last_sequence = [v.get() for v in self.vars]
+            return
+
+        duplicate_index = next(
+            (i for i, var in enumerate(self.vars) if i != changed_index and var.get() == new_value),
+            None,
+        )
+        if duplicate_index is not None:
+            self._sequence_updating = True
+            try:
+                self.vars[duplicate_index].set(old_value)
+            finally:
+                self._sequence_updating = False
+        self._last_sequence = [v.get() for v in self.vars]
+
+    def save(self):
+        vals = [v.get() for v in self.vars]
+        if len(set(vals)) != len(vals):
+            messagebox.showerror("Sequência inválida", "Cada campo deve aparecer uma única vez.", parent=self)
+            return
+        self.result = vals
+        self.destroy()
+
+    def cancel(self):
+        self.destroy()
+
+
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title(f"{APP_NAME} v{APP_VERSION}")
+        self.geometry("1060x700")
+        self.minsize(900, 620)
+
+        self.base_dir = app_base_dir()
+        self.equipments = read_json(self.base_dir / "config" / "equipamentos.json", {}) or {}
