@@ -1,0 +1,421 @@
+from __future__ import annotations
+
+import json
+import os
+import re
+import shutil
+import sys
+import time
+import uuid
+import unicodedata
+import hashlib
+import subprocess
+import tempfile
+import threading
+import urllib.error
+import urllib.request
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+import tkinter as tk
+from tkinter import ttk, messagebox, filedialog
+
+APP_NAME = "Planilhador de Equipamentos"
+APP_VERSION = "0.2.4"
+OFFICIAL_GITHUB_REPO = "clienteg1603/Planilhador-de-Equipamentos"
+
+
+def app_base_dir() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(getattr(sys, "_MEIPASS", Path(sys.executable).parent))
+    return Path(__file__).resolve().parent
+
+
+def local_config_dir() -> Path:
+    base = os.environ.get("LOCALAPPDATA")
+    if base:
+        return Path(base) / "PlanilhadorEquipamentos"
+    return Path.home() / ".planilhador_equipamentos"
+
+
+def now_iso() -> str:
+    return datetime.now().astimezone().isoformat(timespec="seconds")
+
+
+def safe_name(value: str) -> str:
+    value = value.strip()
+    value = re.sub(r"[^A-Za-z0-9._-]+", "_", value)
+    return value[:100] or "sem_nome"
+
+
+def normalize_header(value) -> str:
+    if value is None:
+        return ""
+    text = str(value).strip().upper()
+    text = "".join(c for c in unicodedata.normalize("NFD", text) if unicodedata.category(c) != "Mn")
+    text = re.sub(r"\s+", " ", text)
+    return text
+
+
+def atomic_json_write(path: Path, data: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    with tmp.open("w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp, path)
+
+
+def read_json(path: Path, default=None):
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return default
+
+
+def version_key(value: str) -> tuple[int, ...]:
+    """Converte v1.2.3 / 1.2.3 em tupla comparável."""
+    nums = re.findall(r"\d+", str(value or ""))
+    return tuple(int(x) for x in nums[:4]) or (0,)
+
+
+def normalize_github_repo(value: str) -> str:
+    value = (value or "").strip().rstrip("/")
+    value = re.sub(r"\.git$", "", value, flags=re.I)
+    m = re.search(r"github\.com/([^/]+)/([^/]+)$", value, re.I)
+    if m:
+        return f"{m.group(1)}/{m.group(2)}"
+    if re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", value):
+        return value
+    return ""
+
+
+def sha256_file(path: Path) -> str:
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for chunk in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(chunk)
+    return h.hexdigest().lower()
+
+
+class UpdateManager:
+    """Atualização via GitHub Releases para repositórios públicos.
+
+    A release deve possuir como asset um ZIP chamado, preferencialmente,
+    Planilhador_Equipamentos_vX.Y.Z.zip. Opcionalmente pode haver um arquivo
+    .sha256 com o mesmo nome + .sha256 para validação de integridade.
+    """
+
+    def __init__(self, app):
+        self.app = app
+        self.busy = False
+
+    def _status(self, text: str):
+        self.app.after(0, lambda: self.app.set_update_status(text))
+
+    def check_async(self, manual: bool = False):
+        if self.busy:
+            if manual:
+                messagebox.showinfo("Atualizações", "Já existe uma verificação em andamento.")
+            return
+        repo = OFFICIAL_GITHUB_REPO
+        self.busy = True
+        self._status("Verificando atualizações no GitHub...")
+        threading.Thread(target=self._check_worker, args=(repo, manual), daemon=True).start()
+
+    @staticmethod
+    def _request_json(url: str, timeout: int = 10):
+        req = urllib.request.Request(
+            url,
+            headers={
+                "Accept": "application/vnd.github+json",
+                "User-Agent": f"PlanilhadorEquipamentos/{APP_VERSION}",
+                "X-GitHub-Api-Version": "2022-11-28",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            return json.loads(response.read().decode("utf-8"))
+
+    def _check_worker(self, repo: str, manual: bool):
+        try:
+            data = self._request_json(f"https://api.github.com/repos/{repo}/releases/latest")
+            tag = str(data.get("tag_name") or "").strip()
+            new_version = tag.lstrip("vV")
+            if not new_version:
+                raise RuntimeError("A release mais recente não possui uma versão válida.")
+            if version_key(new_version) <= version_key(APP_VERSION):
+                self.app.after(0, lambda: self._up_to_date(manual))
+                return
+
+            assets = data.get("assets") or []
+            preferred_names = [
+                f"Planilhador_Equipamentos_Update_v{new_version}.zip".lower(),
+                f"Planilhador_Equipamentos_v{new_version}.zip".lower(),
+            ]
+            zip_asset = None
+            for wanted in preferred_names:
+                for asset in assets:
+                    if str(asset.get("name", "")).lower() == wanted:
+                        zip_asset = asset
+                        break
+                if zip_asset is not None:
+                    break
+            if zip_asset is None:
+                candidates = [a for a in assets if str(a.get("name", "")).lower().endswith(".zip") and "planilhador_equipamentos" in str(a.get("name", "")).lower()]
+                if candidates:
+                    zip_asset = candidates[0]
+            if zip_asset is None:
+                raise RuntimeError(
+                    f"A versão {new_version} existe, mas não encontrei o pacote de atualização (.zip) nos assets da Release."
+                )
+
+            sha_asset = None
+            expected_sha_name = (str(zip_asset.get("name")) + ".sha256").lower()
+            for asset in assets:
+                if str(asset.get("name", "")).lower() == expected_sha_name:
+                    sha_asset = asset
+                    break
+
+            info = {
+                "version": new_version,
+                "tag": tag,
+                "release_name": str(data.get("name") or tag),
+                "release_url": str(data.get("html_url") or ""),
+                "zip_name": str(zip_asset.get("name")),
+                "zip_url": str(zip_asset.get("browser_download_url")),
+                "sha_url": str(sha_asset.get("browser_download_url")) if sha_asset else "",
+            }
+            self.app.after(0, lambda: self._offer_update(info))
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                msg = "Repositório ou Release não encontrado. Confira se o repositório é público e possui uma Release publicada."
+            else:
+                msg = f"GitHub respondeu com erro HTTP {e.code}."
+            self.app.after(0, lambda m=msg: self._check_failed(m, manual))
+        except Exception as e:
+            self.app.after(0, lambda m=str(e): self._check_failed(m, manual))
+        finally:
+            self.busy = False
+
+    def _up_to_date(self, manual: bool):
+        self.busy = False
+        self.app.set_update_status(f"Atualizado — versão {APP_VERSION}")
+        if manual:
+            messagebox.showinfo("Atualizações", f"Você já está usando a versão mais recente: {APP_VERSION}.")
+
+    def _check_failed(self, msg: str, manual: bool):
+        self.busy = False
+        self.app.set_update_status("Não foi possível verificar agora.")
+        if manual:
+            messagebox.showerror("Atualizações", msg)
+
+    def _offer_update(self, info: dict):
+        self.busy = False
+        self.app.set_update_status(f"Nova versão disponível: {info['version']}")
+        if not messagebox.askyesno(
+            "Nova versão disponível",
+            f"Versão instalada: {APP_VERSION}\n"
+            f"Nova versão: {info['version']}\n\n"
+            "Deseja baixar e instalar agora?\n\n"
+            "O programa fará backup da versão atual e será reiniciado.",
+        ):
+            return
+        self.download_and_install(info)
+
+    def download_and_install(self, info: dict):
+        if self.busy:
+            return
+        self.busy = True
+        self._status(f"Baixando versão {info['version']}...")
+        threading.Thread(target=self._download_worker, args=(info,), daemon=True).start()
+
+    @staticmethod
+    def _download(url: str, path: Path):
+        req = urllib.request.Request(url, headers={"User-Agent": f"PlanilhadorEquipamentos/{APP_VERSION}"})
+        with urllib.request.urlopen(req, timeout=45) as response, path.open("wb") as f:
+            shutil.copyfileobj(response, f)
+
+    def _download_worker(self, info: dict):
+        try:
+            updates_dir = local_config_dir() / "updates"
+            updates_dir.mkdir(parents=True, exist_ok=True)
+            package = updates_dir / safe_name(info["zip_name"])
+            self._download(info["zip_url"], package)
+            if package.stat().st_size < 1000:
+                raise RuntimeError("O pacote baixado parece estar incompleto.")
+
+            if info.get("sha_url"):
+                sha_file = updates_dir / (package.name + ".sha256")
+                self._download(info["sha_url"], sha_file)
+                expected = re.search(r"\b[a-fA-F0-9]{64}\b", sha_file.read_text(encoding="utf-8", errors="ignore"))
+                if not expected:
+                    raise RuntimeError("O arquivo SHA-256 da Release é inválido.")
+                actual = sha256_file(package)
+                if actual != expected.group(0).lower():
+                    raise RuntimeError("A verificação SHA-256 falhou. A atualização foi cancelada.")
+
+            self.app.after(0, lambda: self._launch_updater(package, info["version"]))
+        except Exception as e:
+            self.app.after(0, lambda m=str(e): self._download_failed(m))
+        finally:
+            self.busy = False
+
+    def _download_failed(self, msg: str):
+        self.app.set_update_status("Falha ao baixar a atualização.")
+        messagebox.showerror("Atualização não instalada", msg)
+
+    def _launch_updater(self, package: Path, new_version: str):
+        updater = self.app.base_dir / "Atualizador.pyw"
+        if not updater.exists():
+            messagebox.showerror("Atualização", "Atualizador.pyw não foi encontrado nesta instalação.")
+            return
+        temp_updater = local_config_dir() / "updates" / f"Atualizador_{int(time.time())}.pyw"
+        shutil.copy2(updater, temp_updater)
+
+        python_exe = Path(sys.executable)
+        cmd = [
+            str(python_exe), str(temp_updater),
+            "--pid", str(os.getpid()),
+            "--target", str(self.app.base_dir),
+            "--package", str(package),
+            "--current-version", APP_VERSION,
+            "--new-version", new_version,
+        ]
+        try:
+            subprocess.Popen(cmd, cwd=str(local_config_dir()), close_fds=True)
+        except Exception as e:
+            messagebox.showerror("Atualização", f"Não consegui iniciar o atualizador:\n{e}")
+            return
+        self.app.destroy()
+
+
+class LotLock:
+    """Bloqueio simples por arquivo, adequado para uma pasta compartilhada SMB."""
+
+    def __init__(self, lock_path: Path, timeout: float = 8.0):
+        self.lock_path = lock_path
+        self.timeout = timeout
+        self.fd = None
+
+    def __enter__(self):
+        self.lock_path.parent.mkdir(parents=True, exist_ok=True)
+        end = time.time() + self.timeout
+        while True:
+            try:
+                self.fd = os.open(str(self.lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.write(self.fd, f"{os.getpid()} {now_iso()}".encode("utf-8"))
+                return self
+            except FileExistsError:
+                # Remove lock claramente órfão (> 5 min), caso um PC tenha sido desligado abruptamente.
+                try:
+                    age = time.time() - self.lock_path.stat().st_mtime
+                    if age > 300:
+                        self.lock_path.unlink(missing_ok=True)
+                        continue
+                except OSError:
+                    pass
+                if time.time() >= end:
+                    raise TimeoutError("O lote está sendo atualizado por outro computador. Tente novamente.")
+                time.sleep(0.12)
+
+    def __exit__(self, exc_type, exc, tb):
+        try:
+            if self.fd is not None:
+                os.close(self.fd)
+        finally:
+            try:
+                self.lock_path.unlink(missing_ok=True)
+            except OSError:
+                pass
+
+
+@dataclass
+class LotInfo:
+    equipment_key: str
+    equipment_name: str
+    lot: str
+    count: int
+    operators: list[str]
+    status: str
+    last_export_count: int
+    finalized: bool
+
+
+class DataStore:
+    def __init__(self, root: Path):
+        self.root = Path(root)
+        self.ensure()
+
+    def ensure(self):
+        for sub in ("lotes", "usuarios"):
+            (self.root / sub).mkdir(parents=True, exist_ok=True)
+
+    def user_path(self, username: str) -> Path:
+        return self.root / "usuarios" / f"{safe_name(username)}.json"
+
+    def load_user(self, username: str) -> dict:
+        return read_json(self.user_path(username), {
+            "nome": username.strip(),
+            "sequencias": {},
+            "criado_em": now_iso(),
+        })
+
+    def save_user(self, profile: dict):
+        atomic_json_write(self.user_path(profile["nome"]), profile)
+
+    def lot_dir(self, equipment_key: str, lot: str) -> Path:
+        return self.root / "lotes" / safe_name(equipment_key) / safe_name(lot)
+
+    def lot_lock(self, equipment_key: str, lot: str) -> LotLock:
+        return LotLock(self.lot_dir(equipment_key, lot) / ".lock")
+
+    def is_finalized(self, equipment_key: str, lot: str) -> bool:
+        return (self.lot_dir(equipment_key, lot) / "finalizado.json").exists()
+
+    def load_records(self, equipment_key: str, lot: str) -> list[dict]:
+        envios = self.lot_dir(equipment_key, lot) / "envios"
+        if not envios.exists():
+            return []
+        records = []
+        for p in sorted(envios.glob("*.json")):
+            data = read_json(p, {}) or {}
+            user = data.get("usuario", "")
+            sent_at = data.get("enviado_em", "")
+            for rec in data.get("registros", []):
+                item = dict(rec)
+                item["_usuario"] = user
+                item["_enviado_em"] = sent_at
+                records.append(item)
+        return records
+
+    @staticmethod
+    def duplicate_messages(existing: list[dict], incoming: list[dict]) -> list[str]:
+        existing_serials = {str(r.get("SERIAL", "")).upper() for r in existing if r.get("SERIAL")}
+        existing_iccids = {str(r.get("ICCID", "")) for r in existing if r.get("ICCID")}
+        seen_serials = set()
+        seen_iccids = set()
+        errors = []
+        for idx, rec in enumerate(incoming, start=1):
+            serial = str(rec.get("SERIAL", "")).upper()
+            iccid = str(rec.get("ICCID", ""))
+            if serial:
+                if serial in existing_serials:
+                    errors.append(f"SERIAL {serial} já existe no lote.")
+                elif serial in seen_serials:
+                    errors.append(f"SERIAL {serial} está duplicada neste envio.")
+                seen_serials.add(serial)
+            if iccid:
+                if iccid in existing_iccids:
+                    errors.append(f"ICCID {iccid} já existe no lote.")
+                elif iccid in seen_iccids:
+                    errors.append(f"ICCID {iccid} está duplicado neste envio.")
+                seen_iccids.add(iccid)
+            if len(errors) >= 8:
+                break
+        return errors
+
+    def submit(self, equipment_key: str, equipment_name: str, lot: str, username: str, records: list[dict]):
+        if not records:
+            raise ValueError("Não há registros para enviar.")
+        ldir = self.lot_dir(equipment_key, lot)
+        with self.lot_lock(equipment_key, lot):
