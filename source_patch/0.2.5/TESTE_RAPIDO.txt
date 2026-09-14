@@ -1,0 +1,14 @@
+TESTE RAPIDO - v0.2.5
+
+1. Abra o programa e selecione KIT M1N 2.0.
+2. Confirme que o campo Lote mostra os lotes abertos existentes.
+3. Digite manualmente um lote novo e confirme que continua funcionando.
+4. Abra um lote e confira os três contadores: usuário, total do lote e nesta sessão.
+5. Conclua uma peça válida e confirme que ela é salva automaticamente sem apertar Enviar.
+6. Confirme que o contador do usuário e o total do lote aumentam imediatamente neste PC.
+7. No segundo PC, deixe o mesmo lote aberto e confirme que o total muda sozinho após a sincronização do OneDrive, sem piscar a tela nem perder o foco.
+8. Selecione uma peça concluída nesta sessão, use Excluir selecionada e confirme que a contagem diminui.
+9. Teste duplicidade de SERIAL e ICCID.
+10. Confirme as operadoras e tamanhos: VIVO 20, CLARO 20, TIM 20, QUECTEL 19, ARQUIA 20.
+11. Exporte um lote VIVO e confirme os arquivos esperados.
+12. Finalize o lote e confirme que novas bipagens ficam bloqueadas.
