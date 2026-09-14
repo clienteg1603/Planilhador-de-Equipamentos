@@ -1,0 +1,13 @@
+PUBLICACAO DE ATUALIZACOES NO GITHUB
+Repositorio: clienteg1603/Planilhador-de-Equipamentos
+
+A publicacao e automatizada pelo GitHub Actions.
+
+Fluxo:
+1. Preparar e validar a nova versao.
+2. Enviar o patch da versao para source_patch/X.Y.Z.
+3. Enviar o metadado para release_queue/vX.Y.Z.json.
+4. O GitHub Actions monta o ZIP, gera SHA-256 e publica a Release automaticamente.
+5. Os PCs detectam a nova Release em Configuracoes > Verificar agora ou na verificacao automatica ao abrir.
+
+Nao e necessario criar tag, anexar ZIP ou publicar a Release manualmente.
