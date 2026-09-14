@@ -53,10 +53,14 @@ jobs:
           fi
           cat "${PARTS[@]}" > Planilhador.pyw
           python -m py_compile Planilhador.pyw
+          if [ -f "$PATCH/config/equipamentos.json" ]; then
+            python -m json.tool "$PATCH/config/equipamentos.json" >/dev/null
+          fi
 
       - name: Montar pacote de atualização
         shell: bash
         run: |
+          PATCH="source_patch/$VERSION"
           BASE_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/v$BASE_VERSION/$BASE_ASSET"
           echo "Baixando base: $BASE_URL"
           curl -fL "$BASE_URL" -o base.zip
@@ -70,10 +74,14 @@ jobs:
             mv "$ROOT" "$TARGET"
           fi
           cp -f Planilhador.pyw "$TARGET/Planilhador.pyw"
-          cp -f "source_patch/$VERSION/LEIA-ME.txt" "$TARGET/LEIA-ME.txt"
-          cp -f "source_patch/$VERSION/PUBLICAR_ATUALIZACAO_GITHUB.txt" "$TARGET/PUBLICAR_ATUALIZACAO_GITHUB.txt"
-          cp -f "source_patch/$VERSION/TESTE_RAPIDO.txt" "$TARGET/TESTE_RAPIDO.txt"
-          cp -f "source_patch/$VERSION/update_manifest.json" "$TARGET/update_manifest.json"
+          cp -f "$PATCH/LEIA-ME.txt" "$TARGET/LEIA-ME.txt"
+          cp -f "$PATCH/PUBLICAR_ATUALIZACAO_GITHUB.txt" "$TARGET/PUBLICAR_ATUALIZACAO_GITHUB.txt"
+          cp -f "$PATCH/TESTE_RAPIDO.txt" "$TARGET/TESTE_RAPIDO.txt"
+          cp -f "$PATCH/update_manifest.json" "$TARGET/update_manifest.json"
+          if [ -f "$PATCH/config/equipamentos.json" ]; then
+            mkdir -p "$TARGET/config"
+            cp -f "$PATCH/config/equipamentos.json" "$TARGET/config/equipamentos.json"
+          fi
           (cd work && zip -qr "../$ASSET" "Planilhador_Equipamentos_v$VERSION")
           sha256sum "$ASSET" | awk '{print $1 "  " ENVIRON["ASSET"]}' > "$ASSET.sha256"
 
