@@ -1,0 +1,40 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.2.5
+
+NOVIDADES
+- Ao selecionar um equipamento, o campo Lote passa a listar os lotes ainda abertos daquele equipamento.
+- O campo continua editável: é possível escolher um lote existente ou digitar um lote novo manualmente.
+- Ao abrir um lote, a tela mostra três contagens separadas:
+  * quantidade já salva pelo usuário atual naquele lote;
+  * quantidade total já salva no lote por todos os usuários;
+  * quantidade concluída nesta sessão deste PC.
+- As contagens do usuário e do lote são verificadas automaticamente a cada 2 segundos.
+- A atualização altera somente os números da tela; a área de bipagem e o foco não são reconstruídos.
+- Cada peça é salva automaticamente assim que SERIAL, ICCID e SENHA ficam completos e válidos.
+- O botão Enviar deixa de ser necessário.
+- A peça aparece na contagem do próprio PC imediatamente; nos outros PCs aparece assim que o OneDrive sincronizar o novo arquivo.
+- A opção Excluir selecionada continua disponível para peças concluídas na sessão atual e remove a peça do lote compartilhado.
+
+OPERADORAS
+- 8955068 = VIVO, ICCID com 20 dígitos
+- 8955053 = CLARO, ICCID com 20 dígitos
+- 8955548 = TIM, ICCID com 20 dígitos
+- 8955132 = QUECTEL, ICCID com 19 dígitos
+- 8955180 = ARQUIA, ICCID com 20 dígitos
+
+EQUIPAMENTOS INICIAIS
+- KIT M1N 2.0
+- ADPlus
+- M2N
+
+OBSERVAÇÃO SOBRE ONEDRIVE
+O programa verifica a pasta local sincronizada a cada 2 segundos, mas o tempo para uma peça aparecer no outro PC depende do tempo de sincronização do OneDrive. Não há recarregamento visual da janela.
+
+EXPORTAÇÃO
+- Mantém a planilha Mestre/NF e a planilha de importação da operadora quando houver modelo configurado.
+- Nesta versão, o modelo de importação configurado continua sendo o da VIVO.
+- SERIAL, ICCID, OPERADORA e SENHA são gravados como TEXTO.
+
+ATUALIZAÇÕES
+- Repositório oficial: clienteg1603/Planilhador-de-Equipamentos
+- Use Configurações > Verificar agora ou a verificação automática ao iniciar.
+- DADOS_COMPARTILHADOS, configurações locais e modelos existentes são preservados pela rotina de atualização.
