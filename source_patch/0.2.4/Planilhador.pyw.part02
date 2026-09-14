@@ -1,0 +1,344 @@
+        if not self.equipments:
+            messagebox.showerror("Erro", "Configuração de equipamentos não encontrada.")
+            self.destroy()
+            return
+
+        self.local_settings_path = local_config_dir() / "settings.json"
+        self.local_settings_path.parent.mkdir(parents=True, exist_ok=True)
+        self.settings = read_json(self.local_settings_path, {}) or {}
+        shared = self.settings.get("pasta_compartilhada")
+        if not shared:
+            shared = str(self.base_dir / "DADOS_COMPARTILHADOS")
+        self.shared_path = Path(shared)
+        self.store = DataStore(self.shared_path)
+        self.update_manager = UpdateManager(self)
+
+        self.username = ""
+        self.profile = {}
+        self.current_eq_key = None
+        self.current_lot = None
+        self.session_records = []
+        self.scan_entries = {}
+        self.scan_sequence = []
+        self.current_operator = tk.StringVar(value="—")
+        self.scan_status = tk.StringVar(value="Selecione equipamento e lote para começar.")
+
+        self.style = ttk.Style(self)
+        try:
+            self.style.theme_use("vista")
+        except tk.TclError:
+            pass
+
+        self.withdraw()
+        if not self.login_dialog():
+            self.destroy()
+            return
+        self.deiconify()
+        self.build_ui()
+        if self.settings.get("verificar_atualizacoes_inicio", True):
+            self.after(900, lambda: self.update_manager.check_async(manual=False))
+
+    def login_dialog(self) -> bool:
+        dialog = tk.Toplevel(self)
+        dialog.title("Entrar")
+        dialog.resizable(False, False)
+        dialog.grab_set()
+        ok = {"value": False}
+        name_var = tk.StringVar(value=self.settings.get("ultimo_usuario", ""))
+        ttk.Label(dialog, text=APP_NAME, font=("Segoe UI", 16, "bold")).pack(padx=30, pady=(24, 6))
+        ttk.Label(dialog, text="Digite seu nome/login:").pack(padx=30, pady=(12, 4), anchor="w")
+        entry = ttk.Entry(dialog, textvariable=name_var, width=34)
+        entry.pack(padx=30, pady=(0, 12))
+
+        def enter(*_):
+            name = name_var.get().strip()
+            if len(name) < 2:
+                messagebox.showwarning("Login", "Digite um nome/login válido.", parent=dialog)
+                return
+            self.username = name
+            self.profile = self.store.load_user(name)
+            self.settings["ultimo_usuario"] = name
+            self.save_local_settings()
+            ok["value"] = True
+            dialog.destroy()
+
+        ttk.Button(dialog, text="Entrar", command=enter).pack(pady=(0, 24))
+        entry.bind("<Return>", enter)
+        dialog.protocol("WM_DELETE_WINDOW", dialog.destroy)
+        dialog.wait_visibility()
+        entry.focus_force()
+        self.wait_window(dialog)
+        return ok["value"]
+
+    def save_local_settings(self):
+        atomic_json_write(self.local_settings_path, self.settings)
+
+    def build_ui(self):
+        top = ttk.Frame(self, padding=(14, 10))
+        top.pack(fill="x")
+        ttk.Label(top, text=APP_NAME, font=("Segoe UI", 16, "bold")).pack(side="left")
+        ttk.Label(top, text=f"Usuário: {self.username}").pack(side="right")
+
+        self.notebook = ttk.Notebook(self)
+        self.notebook.pack(fill="both", expand=True, padx=12, pady=(0, 12))
+        self.tab_scan = ttk.Frame(self.notebook, padding=14)
+        self.tab_central = ttk.Frame(self.notebook, padding=14)
+        self.tab_settings = ttk.Frame(self.notebook, padding=14)
+        self.notebook.add(self.tab_scan, text="Lançamento")
+        self.notebook.add(self.tab_central, text="Central")
+        self.notebook.add(self.tab_settings, text="Configurações")
+
+        self.build_scan_tab()
+        self.build_central_tab()
+        self.build_settings_tab()
+        self.refresh_lots()
+
+    # ---------------- Lançamento ----------------
+    def build_scan_tab(self):
+        selector = ttk.LabelFrame(self.tab_scan, text="Lote", padding=12)
+        selector.pack(fill="x")
+        ttk.Label(selector, text="Equipamento").grid(row=0, column=0, sticky="w")
+        self.eq_var = tk.StringVar()
+        self.eq_combo = ttk.Combobox(selector, textvariable=self.eq_var, state="readonly", width=28,
+                                     values=[cfg["nome"] for cfg in self.equipments.values()])
+        self.eq_combo.grid(row=1, column=0, padx=(0, 12), pady=(3, 0), sticky="ew")
+        ttk.Label(selector, text="Lote").grid(row=0, column=1, sticky="w")
+        self.lot_var = tk.StringVar()
+        ttk.Entry(selector, textvariable=self.lot_var, width=20).grid(row=1, column=1, padx=(0, 12), pady=(3, 0))
+        ttk.Button(selector, text="Iniciar / abrir lote", command=self.start_lot).grid(row=1, column=2, padx=(0, 8))
+        ttk.Button(selector, text="Minha sequência", command=self.change_sequence).grid(row=1, column=3)
+        selector.columnconfigure(0, weight=1)
+
+        self.scan_frame = ttk.LabelFrame(self.tab_scan, text="Bipagem", padding=14)
+        self.scan_frame.pack(fill="x", pady=(14, 10))
+        ttk.Label(self.scan_frame, textvariable=self.scan_status, font=("Segoe UI", 13, "bold")).pack(anchor="w", pady=(0, 10))
+        self.fields_frame = ttk.Frame(self.scan_frame)
+        self.fields_frame.pack(fill="x")
+        self.operator_label = ttk.Label(self.scan_frame, textvariable=self.current_operator)
+        ttk.Label(self.scan_frame, text="Operadora identificada:").pack(anchor="w", pady=(10, 0))
+        self.operator_label.pack(anchor="w")
+
+        actions = ttk.Frame(self.tab_scan)
+        actions.pack(fill="x", pady=(2, 8))
+        self.count_var = tk.StringVar(value="Peças nesta sessão: 0")
+        ttk.Label(actions, textvariable=self.count_var, font=("Segoe UI", 11, "bold")).pack(side="left")
+        ttk.Button(actions, text="Excluir selecionada", command=self.delete_selected_session).pack(side="right")
+        self.send_btn = ttk.Button(actions, text="Enviar 0 peças", command=self.send_session, state="disabled")
+        self.send_btn.pack(side="right", padx=(0, 8))
+
+        cols = ("SERIAL", "ICCID", "OPERADORA", "SENHA")
+        self.session_tree = ttk.Treeview(self.tab_scan, columns=cols, show="headings", height=14)
+        for c in cols:
+            self.session_tree.heading(c, text=c)
+            self.session_tree.column(c, width=210 if c == "ICCID" else 150, anchor="center")
+        self.session_tree.pack(fill="both", expand=True)
+
+    def equipment_key_from_name(self, name: str):
+        for k, cfg in self.equipments.items():
+            if cfg.get("nome") == name:
+                return k
+        return None
+
+    def start_lot(self):
+        eq_key = self.equipment_key_from_name(self.eq_var.get())
+        lot = self.lot_var.get().strip()
+        if not eq_key or not lot:
+            messagebox.showwarning("Lote", "Selecione o equipamento e informe o lote.")
+            return
+        if any(ch in lot for ch in "\\/:*?\"<>|"):
+            messagebox.showwarning("Lote", "O lote contém caracteres inválidos.")
+            return
+        if self.session_records and (eq_key != self.current_eq_key or lot != self.current_lot):
+            if not messagebox.askyesno("Trocar lote", "Existem peças ainda não enviadas. Deseja descartá-las e trocar de lote?"):
+                return
+            self.session_records.clear()
+            self.refresh_session_table()
+        if self.store.is_finalized(eq_key, lot):
+            messagebox.showerror("Lote finalizado", "Este lote já foi finalizado e não aceita novas peças.")
+            return
+        self.current_eq_key = eq_key
+        self.current_lot = lot
+        self.prepare_scan_fields()
+
+    def get_sequence(self, eq_key: str, ask_if_missing=True):
+        fields = list(self.equipments[eq_key]["campos"])
+        current = self.profile.get("sequencias", {}).get(eq_key)
+        if current and set(current) == set(fields):
+            return current
+        if not ask_if_missing:
+            return fields
+        dialog = SequenceDialog(self, fields, current)
+        self.wait_window(dialog)
+        if dialog.result:
+            self.profile.setdefault("sequencias", {})[eq_key] = dialog.result
+            self.store.save_user(self.profile)
+            return dialog.result
+        return fields
+
+    def change_sequence(self):
+        eq_key = self.equipment_key_from_name(self.eq_var.get()) or self.current_eq_key
+        if not eq_key:
+            messagebox.showinfo("Sequência", "Selecione primeiro um equipamento.")
+            return
+        fields = list(self.equipments[eq_key]["campos"])
+        current = self.profile.get("sequencias", {}).get(eq_key, fields)
+        dialog = SequenceDialog(self, fields, current)
+        self.wait_window(dialog)
+        if dialog.result:
+            self.profile.setdefault("sequencias", {})[eq_key] = dialog.result
+            self.store.save_user(self.profile)
+            if self.current_eq_key == eq_key:
+                self.prepare_scan_fields()
+
+    def prepare_scan_fields(self):
+        for child in self.fields_frame.winfo_children():
+            child.destroy()
+        self.scan_entries = {}
+        self.scan_sequence = self.get_sequence(self.current_eq_key)
+        cfg = self.equipments[self.current_eq_key]
+        self.scan_status.set(f"{cfg['nome']} — Lote {self.current_lot} — BIPAR {self.scan_sequence[0]}")
+        for i, field in enumerate(self.scan_sequence):
+            frame = ttk.Frame(self.fields_frame)
+            frame.grid(row=0, column=i, padx=(0, 12), sticky="ew")
+            self.fields_frame.columnconfigure(i, weight=1)
+            ttk.Label(frame, text=f"{i+1}º  {field}").pack(anchor="w")
+            ent = ttk.Entry(frame, font=("Consolas", 13), width=24)
+            ent.pack(fill="x", pady=(4, 0))
+            ent.bind("<Return>", lambda e, f=field: self.on_scan_enter(f))
+            self.scan_entries[field] = ent
+        self.current_operator.set("—")
+        first = self.scan_entries[self.scan_sequence[0]]
+        self.after(80, first.focus_set)
+
+    def validate_field(self, field: str, raw: str):
+        cfg = self.equipments[self.current_eq_key]
+        rule = cfg.get("validacoes", {}).get(field, {})
+        value = raw.strip()
+        if rule.get("maiusculo"):
+            value = value.upper()
+        typ = rule.get("tipo")
+        if typ == "digitos" and not value.isdigit():
+            return False, value, f"{field} deve conter somente números."
+        if typ == "alfanumerico" and not re.fullmatch(r"[A-Za-z0-9]+", value or ""):
+            return False, value, f"{field} deve conter somente letras e números."
+        if field == "ICCID":
+            operator_rule = self.identify_operator_rule(value)
+            if not operator_rule:
+                return False, value, "ICCID com prefixo de operadora não cadastrado."
+            expected_size = operator_rule.get("tamanho_iccid", rule.get("tamanho"))
+            if expected_size and len(value) != int(expected_size):
+                operator = str(operator_rule.get("operadora", "")).upper()
+                return False, value, f"ICCID da {operator} deve ter exatamente {expected_size} dígitos."
+        else:
+            size = rule.get("tamanho")
+            if size and len(value) != int(size):
+                return False, value, f"{field} deve ter exatamente {size} caracteres."
+        return True, value, ""
+
+    def identify_operator_rule(self, iccid: str) -> dict | None:
+        cfg = self.equipments[self.current_eq_key]
+        rules = sorted(cfg.get("operadoras_por_prefixo", []), key=lambda x: len(x.get("prefixo", "")), reverse=True)
+        for item in rules:
+            if iccid.startswith(str(item.get("prefixo", ""))):
+                return item
+        return None
+
+    def identify_operator(self, iccid: str) -> str | None:
+        item = self.identify_operator_rule(iccid)
+        if not item:
+            return None
+        return str(item.get("operadora", "")).upper()
+
+    def on_scan_enter(self, field: str):
+        if not self.current_eq_key or not self.current_lot:
+            return
+        if self.store.is_finalized(self.current_eq_key, self.current_lot):
+            messagebox.showerror("Lote finalizado", "Este lote foi finalizado em outro computador.")
+            return
+        ent = self.scan_entries[field]
+        ok, value, error = self.validate_field(field, ent.get())
+        if not ok:
+            self.scan_status.set(f"ERRO: {error}")
+            self.bell()
+            ent.focus_set()
+            ent.selection_range(0, "end")
+            return
+        ent.delete(0, "end")
+        ent.insert(0, value)
+        if field == "ICCID":
+            self.current_operator.set(self.identify_operator(value) or "—")
+
+        idx = self.scan_sequence.index(field)
+        if idx < len(self.scan_sequence) - 1:
+            next_field = self.scan_sequence[idx + 1]
+            self.scan_status.set(f"BIPAR {next_field}")
+            self.scan_entries[next_field].focus_set()
+            return
+        self.commit_scanned_record()
+
+    def commit_scanned_record(self):
+        rec = {}
+        for field in self.scan_sequence:
+            ok, value, error = self.validate_field(field, self.scan_entries[field].get())
+            if not ok:
+                self.scan_status.set(f"ERRO: {error}")
+                self.scan_entries[field].focus_set()
+                self.bell()
+                return
+            rec[field] = value
+        rec["OPERADORA"] = self.identify_operator(rec["ICCID"])
+
+        for old in self.session_records:
+            if old.get("SERIAL") == rec.get("SERIAL"):
+                self.scan_status.set(f"ERRO: SERIAL {rec['SERIAL']} duplicada nesta sessão.")
+                self.bell(); return
+            if old.get("ICCID") == rec.get("ICCID"):
+                self.scan_status.set(f"ERRO: ICCID {rec['ICCID']} duplicado nesta sessão.")
+                self.bell(); return
+
+        self.session_records.append(rec)
+        self.refresh_session_table()
+        for ent in self.scan_entries.values():
+            ent.delete(0, "end")
+        self.current_operator.set("—")
+        self.scan_status.set(f"Peça adicionada ✓  —  BIPAR {self.scan_sequence[0]}")
+        self.scan_entries[self.scan_sequence[0]].focus_set()
+
+    def refresh_session_table(self):
+        self.session_tree.delete(*self.session_tree.get_children())
+        for i, rec in enumerate(self.session_records):
+            self.session_tree.insert("", "end", iid=str(i), values=(rec.get("SERIAL"), rec.get("ICCID"), rec.get("OPERADORA"), rec.get("SENHA")))
+        n = len(self.session_records)
+        self.count_var.set(f"Peças nesta sessão: {n}")
+        self.send_btn.config(text=f"Enviar {n} peças", state="normal" if n else "disabled")
+
+    def delete_selected_session(self):
+        sel = self.session_tree.selection()
+        if not sel:
+            return
+        indexes = sorted([int(x) for x in sel], reverse=True)
+        for idx in indexes:
+            if 0 <= idx < len(self.session_records):
+                self.session_records.pop(idx)
+        self.refresh_session_table()
+
+    def send_session(self):
+        if not self.session_records or not self.current_eq_key or not self.current_lot:
+            return
+        records = [dict(r) for r in self.session_records]
+        try:
+            total = self.store.submit(
+                self.current_eq_key,
+                self.equipments[self.current_eq_key]["nome"],
+                self.current_lot,
+                self.username,
+                records,
+            )
+        except (ValueError, TimeoutError, OSError) as e:
+            messagebox.showerror("Envio não realizado", str(e))
+            return
+        sent = len(records)
+        self.session_records.clear()
+        self.refresh_session_table()
+        self.scan_status.set(f"{sent} peças enviadas ✓  —  total atual do lote: {total}")
+        self.refresh_lots()
