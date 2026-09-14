@@ -1,0 +1,13 @@
+TESTE RÁPIDO - PLANILHADOR v0.3.1
+
+1. Abra a Central e selecione um lote com registros válidos.
+2. Clique em Exportar e confirme que aparece a tela Conferência antes da exportação.
+3. Confira quantidade, operadoras, modelo Mestre/NF e modelo de importação.
+4. Em um lote VIVO, confirme que a exportação pode prosseguir quando não há conflitos/revisão.
+5. Em um lote com operadora sem modelo configurado, confirme que Exportar agora fica bloqueado e o motivo aparece.
+6. Exporte um lote e confirme que o programa oferece abrir a pasta gerada.
+7. Volte à Central e confirme que Abrir última pasta fica disponível para o lote exportado.
+8. Exporte novamente e confirme que a última pasta usada aparece como pasta inicial da seleção.
+9. Altere/exclua uma peça de um lote já exportado e confira que a conferência informa REEXPORTAÇÃO NECESSÁRIA.
+10. Confirme que Finalizar lote só fica disponível depois de uma exportação atualizada.
+11. Nos dois PCs, teste que conflitos/revisões ainda bloqueiam a exportação.
