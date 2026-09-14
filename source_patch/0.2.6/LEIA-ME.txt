@@ -1,0 +1,22 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.2.6
+
+ETAPA 1 - BIPAGEM E CORRECAO
+
+- Cada peca completa continua sendo salva automaticamente no lote compartilhado.
+- Na tabela da sessao, selecione uma peca e use "Editar selecionada" para corrigir SERIAL, ICCID ou SENHA.
+- Tambem e possivel abrir a edicao com duplo clique na linha.
+- A OPERADORA nao e digitada manualmente: ela e recalculada automaticamente a partir do ICCID corrigido.
+- Toda correcao passa novamente pelas mesmas validacoes de tamanho, formato, prefixo de operadora e duplicidade global de SERIAL/ICCID.
+- A edicao e permitida somente para pecas da sessao do proprio usuario e e bloqueada quando o lote esta finalizado.
+- Cada edicao gera um registro interno de historico com usuario, data/hora, valores anteriores e valores novos.
+- Se uma peca for editada ou excluida depois de uma exportacao, o lote passa a exigir nova exportacao antes de poder ser finalizado.
+- O botao "Excluir selecionada" continua disponivel com confirmacao antes da remocao.
+
+ATALHOS NA EDICAO
+- Esc = cancelar.
+- Ctrl+Enter = salvar correcao.
+
+ATUALIZACOES
+- Repositorio oficial: clienteg1603/Planilhador-de-Equipamentos
+- O programa verifica a Release mais recente em Configuracoes > Verificar agora.
+- Dados compartilhados, configuracoes locais e modelos existentes sao preservados pela rotina de atualizacao.
