@@ -47,7 +47,9 @@ jobs:
           PATCH="source_patch/$VERSION"
           test -d "$PATCH" || (echo "Patch não encontrado: $PATCH" && exit 1)
 
-          if [ -f "$PATCH/build_patch.py" ]; then
+          if [ -f "$PATCH/build_patch_fix.py" ]; then
+            python "$PATCH/build_patch_fix.py"
+          elif [ -f "$PATCH/build_patch.py" ]; then
             python "$PATCH/build_patch.py"
           else
             PARTS=("$PATCH"/Planilhador.pyw.part*)
