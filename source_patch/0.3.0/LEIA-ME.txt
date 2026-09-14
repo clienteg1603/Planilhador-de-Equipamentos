@@ -1,0 +1,21 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.3.0
+
+ETAPA 5 - CENTRAL
+
+- A Central ganhou pesquisa geral por equipamento, lote, operadora e status.
+- Há filtros separados por equipamento e por grupo de status.
+- Os lotes podem ser ordenados clicando nos cabeçalhos das colunas.
+- Os estados ABERTO, EXPORTADO, ALTERADO, CONFLITO, REVISÃO e FINALIZADO recebem destaque visual diferente.
+- A faixa superior resume quantos lotes existem em cada situação e quantos estão sendo exibidos pelos filtros.
+- Os botões Ver lote, Exportar, Finalizar lote e Conflitos agora são habilitados somente quando a ação faz sentido para o lote selecionado.
+- Finalizar lote fica disponível quando a exportação está atualizada e não há conflito/revisão pendente.
+- Lotes com conflito ou revisão mantêm exportação/finalização bloqueadas e direcionam para Conflitos.
+- A consulta de um lote ganhou filtro por usuário e operadora, pesquisa por todos os campos relevantes e botão Atualizar dados.
+- A consulta mostra SERIAL, ICCID, OPERADORA, SENHA, USUÁRIO, PC de origem e horário do envio.
+- A consulta também permite ordenar os registros clicando nos cabeçalhos.
+- O resumo por funcionário permanece visível e foi integrado à tela de consulta.
+
+ATUALIZAÇÕES
+- Repositório oficial: clienteg1603/Planilhador-de-Equipamentos
+- O programa verifica a Release mais recente em Configurações > Verificar agora.
+- Dados compartilhados, configurações locais e modelos existentes são preservados pela rotina de atualização.
