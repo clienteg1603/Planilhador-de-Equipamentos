@@ -1,0 +1,14 @@
+PUBLICACAO AUTOMATICA DE ATUALIZACOES
+Repositorio: clienteg1603/Planilhador-de-Equipamentos
+
+A partir da v0.2.3, a publicacao e feita pelo GitHub Actions.
+Nao e necessario criar tag, Release ou anexar ZIP manualmente.
+
+Fluxo:
+1. O patch da nova versao e enviado ao repositorio.
+2. Um arquivo de metadados e colocado em release_queue.
+3. O GitHub Actions monta o pacote a partir da versao anterior.
+4. O GitHub cria a tag e a Release automaticamente.
+5. Os PCs detectam a nova versao em Configuracoes > Verificar agora.
+
+Os dados compartilhados e as configuracoes locais nao sao publicados no GitHub.
