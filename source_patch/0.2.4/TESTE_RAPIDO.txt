@@ -1,0 +1,15 @@
+TESTE RAPIDO - v0.2.4
+
+1. Abra INICIAR.bat e entre com um usuario.
+2. Abra Minha sequencia e troque SERIAL por ICCID na 1a posicao; confirme que SERIAL vai automaticamente para a antiga posicao do ICCID.
+3. Teste ICCIDs:
+   - VIVO 8955068 + total 20 digitos
+   - CLARO 8955053 + total 20 digitos
+   - TIM 8955548 + total 20 digitos
+   - QUECTEL 8955132 + total 19 digitos
+   - ARQUIA 8955180 + total 20 digitos
+4. Confirme que QUECTEL com 20 digitos e recusado.
+5. Teste KIT M1N 2.0, ADPlus e M2N em um lote de teste.
+6. Envie registros e confirme a uniao na Central.
+7. Exporte um lote VIVO e confirme os dois arquivos.
+8. Finalize o lote e confirme o bloqueio de novas bipagens.
