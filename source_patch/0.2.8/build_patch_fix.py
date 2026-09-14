@@ -16,7 +16,7 @@ pattern = re.compile(
 
 replacement = '''# Ao abrir/trocar lote, a caixa da última peça começa limpa.\nsource, start_count = re.subn(\n    r'(        self\\.current_eq_key = eq_key\\n        self\\.current_lot = lot\\n(?:        #.*\\n)?        self\\.session_records\\.clear\\(\\)\\n)',\n    lambda m: m.group(1) + '        self.last_saved_key = None\\n',\n    source,\n    count=1,\n)\nif start_count != 1:\n    raise SystemExit(f"Trecho de abertura do lote não encontrado (ocorrências={start_count})")\n'''
 
-text, count = pattern.subn(replacement, text, count=1)
+text, count = pattern.subn(lambda _m: replacement, text, count=1)
 if count != 1:
     raise SystemExit(f"Bloco antigo de abertura do lote não encontrado no gerador (ocorrências={count})")
 
