@@ -1,0 +1,6 @@
+{
+  "version": "0.2.7",
+  "base_version": "0.2.6",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.2.6.zip",
+  "notes": "v0.2.7 — Etapa 2: segurança entre PCs / OneDrive\n\n- Registra o PC de origem de cada novo envio.\n- Detecta automaticamente SERIAL/ICCID duplicados depois da sincronização do OneDrive.\n- Adiciona status CONFLITO e painel Central > Conflitos com usuário, PC, horário e registros envolvidos.\n- Nada é apagado automaticamente: o registro incorreto pode ser editado ou excluído manualmente.\n- Exportação e finalização ficam bloqueadas enquanto houver conflito ou revisão de sincronização pendente.\n- A finalização passa a guardar fingerprint e assinaturas dos arquivos de envio.\n- Se dados chegarem ou mudarem depois da finalização, o lote vira CONFLITO PÓS-FINALIZAÇÃO.\n- O lote pode ser reaberto especificamente por esse conflito, com histórico, revisão dos registros sincronizados e exigência de nova exportação/finalização.\n- A bipagem continua verificando alterações a cada 2 segundos sem reconstruir a tela ou tirar o foco."
+}
