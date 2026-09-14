@@ -1,0 +1,22 @@
+{
+  "version": "0.2.4",
+  "files": [
+    "ABRIR_PROGRAMA.bat",
+    "Atualizador.pyw",
+    "INICIAR.bat",
+    "INSTALAR.bat",
+    "LEIA-ME.txt",
+    "PUBLICAR_ATUALIZACAO_GITHUB.txt",
+    "Planilhador.pyw",
+    "TESTE_RAPIDO.txt",
+    "config/equipamentos.json",
+    "requirements.txt",
+    "update_manifest.json",
+    "modelos/KIT_M1N_2_0/modelo_nf.xlsx",
+    "modelos/KIT_M1N_2_0/modelo_importacao_VIVO.xls",
+    "modelos/ADPLUS/modelo_nf.xlsx",
+    "modelos/ADPLUS/modelo_importacao_VIVO.xls",
+    "modelos/M2N/modelo_nf.xlsx",
+    "modelos/M2N/modelo_importacao_VIVO.xls"
+  ]
+}
