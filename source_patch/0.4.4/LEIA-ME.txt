@@ -1,0 +1,17 @@
+Planilhador de Equipamentos v0.4.4
+
+Esta versão corrige a publicação incorreta das v0.4.2/v0.4.3 e inclui:
+- janela responsiva ao monitor;
+- abertura maximizada;
+- modo janela limitado à área útil do monitor;
+- Configurações com rolagem vertical;
+- atualizador com verificação de integridade e proteção contra loop.
+
+A pasta de uso continua contendo apenas:
+- Planilhador.exe
+- Atualizador.exe
+- LEIA-ME.txt
+
+DADOS_COMPARTILHADOS, usuários, lotes, backups e configurações locais são preservados.
+
+A exportação para Excel exige Microsoft Excel instalado no Windows.
