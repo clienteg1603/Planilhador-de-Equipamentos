@@ -1,0 +1,8 @@
+PLANILHADOR DE EQUIPAMENTOS - PUBLICAÇÃO v0.3.3
+
+A publicação desta versão é feita automaticamente pelo GitHub Actions quando release_queue/v0.3.3.json é criado/atualizado.
+
+Base do pacote: v0.3.2
+Arquivo base: Planilhador_Equipamentos_Update_v0.3.2.zip
+
+O workflow reconstrói e valida Planilhador.pyw, monta o pacote, calcula SHA-256 e publica a Release v0.3.3.
