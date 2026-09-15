@@ -1,0 +1,16 @@
+PLANILHADOR DE EQUIPAMENTOS v0.4.8
+
+Correções desta versão:
+- Restaura o ícone azul padrão do Tk, o mesmo visual aprovado pelo usuário na v0.4.5.
+- Remove overrides de ícone/AppUserModelID que estavam fazendo o Windows mostrar ícone de pasta.
+- O programa continua abrindo em modo janela, centralizado e limitado à área útil do monitor.
+- Maximizar fica sob controle do usuário pelo botão do Windows.
+
+Mantidos:
+- layout horizontal do Lançamento;
+- salvamento automático por peça;
+- múltiplas operadoras no mesmo lote;
+- edição, exclusão e desfazer;
+- OneDrive e proteção de conflitos;
+- exportação, backup e diagnóstico;
+- atualizador robusto.
