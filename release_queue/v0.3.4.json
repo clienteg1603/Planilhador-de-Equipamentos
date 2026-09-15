@@ -1,0 +1,6 @@
+{
+  "version": "0.3.4",
+  "base_version": "0.3.3",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.3.3.zip",
+  "notes": "v0.3.4 — Correção de layout\n\n- Corrige o desaparecimento da tabela Peças desta sessão em telas com menor altura útil.\n- Contagem e Última peça foram reunidas em um quadro mais compacto.\n- Editar, Excluir e Desfazer última ficam na mesma barra da tabela.\n- A tabela passa a ocupar a região expansível da janela e ganhou rolagem vertical.\n- Cabeçalho e margens foram levemente compactados.\n- Não altera regras de bipagem, salvamento automático, edição, conflitos, exportação nem suporte a várias operadoras."
+}
