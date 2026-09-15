@@ -1,0 +1,10 @@
+TESTE RÁPIDO - v0.3.3.1
+
+1. Abrir o programa em resolução/altura semelhante a 864 px.
+2. Confirmar que Peças desta sessão aparece sem precisar maximizar além da área disponível.
+3. Confirmar que a tabela possui espaço para várias linhas e rolagem vertical.
+4. Abrir um lote e bipar uma peça; confirmar que ela aparece imediatamente na tabela.
+5. Confirmar que Contagem, Última peça, Editar, Excluir e Desfazer última continuam acessíveis.
+6. Dar duplo clique em uma linha e confirmar que a edição continua funcionando.
+7. Confirmar que o foco da bipagem continua retornando ao primeiro campo após salvar.
+8. Conferir Central e Configurações para garantir que o hotfix não alterou suas funções.
