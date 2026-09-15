@@ -1,0 +1,26 @@
+PLANILHADOR DE EQUIPAMENTOS — v0.4.1
+Distribuição Windows em EXE
+
+ARQUIVOS DA PASTA FINAL
+- Planilhador.exe      programa principal
+- Atualizador.exe      usado somente quando uma atualização precisa ser instalada
+- LEIA-ME.txt          este arquivo
+
+Não é necessário Python instalado para abrir o programa.
+O programa é gráfico e não abre janela de CMD/PowerShell durante o uso normal.
+
+DADOS
+- Configurações locais e backups ficam em %LOCALAPPDATA%\PlanilhadorEquipamentos.
+- A pasta DADOS_COMPARTILHADOS nunca é apagada pela limpeza da instalação.
+- Se este PC já estava configurado para uma pasta compartilhada/OneDrive, essa configuração é preservada.
+
+MIGRAÇÃO DA VERSÃO ANTIGA
+Ao iniciar Planilhador.exe pela primeira vez na pasta antiga, o programa remove apenas os arquivos conhecidos da antiga distribuição Python, como .pyw, .bat, requirements, config/modelos embutidos e arquivos de teste/publicação.
+Pastas desconhecidas e DADOS_COMPARTILHADOS são preservadas.
+
+EXCEL
+A exportação continua exigindo Microsoft Excel instalado no Windows.
+
+ATUALIZAÇÕES
+Configurações > Verificar agora.
+O Atualizador.exe é iniciado de forma temporária, faz backup dos arquivos da instalação e substitui somente os arquivos do programa.
