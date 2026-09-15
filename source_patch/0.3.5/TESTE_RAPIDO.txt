@@ -1,0 +1,17 @@
+TESTE RÁPIDO / PESADO - v0.3.5
+
+1. Abra Configurações > Executar diagnóstico e confirme leitura/gravação OK.
+2. Com dois PCs no mesmo lote, bipe peças diferentes e confirme que ambas aparecem após o OneDrive sincronizar.
+3. Nos dois PCs, antes da sincronização, tente usar o mesmo SERIAL ou ICCID; após sincronizar, confirme que a Central mostra conflito e bloqueia exportar/finalizar.
+4. Corrija ou exclua o registro incorreto pelo painel de Conflitos e confirme que o bloqueio desaparece.
+5. Exporte um lote e depois edite uma peça sem alterar a quantidade total. Confirme que o lote exige nova exportação antes de finalizar.
+6. Durante uma exportação, provoque uma alteração no lote pelo outro PC. A exportação deve avisar que o lote mudou e NÃO marcar os arquivos gerados como exportação válida.
+7. Finalize um lote e depois simule chegada tardia de dado pelo outro PC. Confirme CONFLITO PÓS-FINALIZAÇÃO / revisão.
+8. Confirme que lote misto continua gerando 1 Mestre/NF para todo o lote e importações separadas por operadora presente.
+9. Teste VIVO com modelo disponível e uma operadora sem modelo; a pré-exportação deve bloquear antes de abrir o Excel.
+10. Feche e reabra o programa no meio de uma sessão. Registros já concluídos devem permanecer no lote.
+11. Alterar o catálogo em um PC e usar Recarregar compartilhado no outro.
+12. Execute novamente o diagnóstico após os testes; não deve haver JSON corrompido nem alteração pós-finalização sem revisão.
+
+OBSERVAÇÃO
+A validação automática da publicação compila o código. Os testes de Excel/COM e a concorrência real do OneDrive precisam ser conferidos em Windows com os dois PCs, pois dependem do Excel e do tempo real de sincronização do ambiente.
