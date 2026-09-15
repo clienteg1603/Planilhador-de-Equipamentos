@@ -1,0 +1,15 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.3.4
+
+CORREÇÃO DE LAYOUT
+
+- Corrige a tela de Lançamento em monitores com menor altura útil.
+- A tabela Peças desta sessão permanece visível e ocupa a área expansível da janela.
+- Contagem e Última peça foram reunidas em um quadro mais compacto.
+- Editar, Excluir e Desfazer última ficam na barra da própria tabela.
+- A tabela ganhou rolagem vertical.
+- Cabeçalho, abas e margens foram levemente compactados.
+- Não altera regras de bipagem, salvamento automático, edição, conflitos, exportação ou suporte a várias operadoras.
+
+ATUALIZAÇÕES
+- Repositório oficial: clienteg1603/Planilhador-de-Equipamentos
+- Use Configurações > Verificar agora para instalar a versão mais recente.
