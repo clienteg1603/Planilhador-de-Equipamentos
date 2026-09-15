@@ -1,0 +1,23 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.3.3
+
+ETAPA 8 - POLIMENTO VISUAL
+
+- Mantém a lógica das versões anteriores e reorganiza a apresentação para uso diário.
+- O cabeçalho principal passa a mostrar nome do programa, versão, usuário ativo e estado do compartilhamento de forma mais limpa.
+- Botões principais, secundários e de atenção passam a ter hierarquia visual consistente.
+- Guias, quadros e tabelas receberam espaçamento e tipografia padronizados.
+- A tabela de bipagem ganhou cabeçalho próprio e indicação de edição por duplo clique.
+- O bloco de lote passa a se chamar Lote de trabalho e a área principal Leitura / bipagem.
+- A Central mantém os mesmos filtros e regras, mas com ações mais fáceis de identificar.
+- Configurações ganhou cabeçalho e orientação mais clara sobre compartilhamento, atualizações e cadastros.
+- O gerenciador de equipamentos/operadoras segue compartilhado pelo DADOS_COMPARTILHADOS e recebeu ajustes visuais.
+- Nenhuma regra de validação, conflito, OneDrive, exportação ou lote misto foi removida.
+
+LOTE COM VÁRIAS OPERADORAS
+- Continua suportado normalmente.
+- O Mestre/NF usa o lote inteiro.
+- A importação de chip é separada por cada operadora realmente presente no lote.
+
+ATUALIZAÇÕES
+- Repositório oficial: clienteg1603/Planilhador-de-Equipamentos
+- Use Configurações > Verificar agora para instalar a versão mais recente.
