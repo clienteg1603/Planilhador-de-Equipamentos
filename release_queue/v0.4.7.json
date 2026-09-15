@@ -1,0 +1,5 @@
+{
+  "version": "0.4.7",
+  "base_version": "0.4.6",
+  "notes": "v0.4.7 — Correção do ícone e abertura em modo janela\n\n- Corrige o ícone na barra de tarefas e nas janelas usando a pena azul em formato ICO Windows multirresolução válido.\n- Define AppUserModelID próprio para evitar o ícone padrão do Python/Tk.\n- Aplica o ícone antes da tela de login.\n- O programa deixa de abrir maximizado automaticamente.\n- Continua detectando a área útil do monitor e abre centralizado, em tamanho confortável, sem passar das bordas.\n- Mantém o layout horizontal do Lançamento e todas as regras existentes."
+}
