@@ -29,6 +29,8 @@ jobs:
       - name: Ler metadados da versão
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           @'
           import json, os, re
           from pathlib import Path
@@ -61,6 +63,8 @@ jobs:
       - name: Reconstruir e validar código
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           $patch = "source_patch/$env:VERSION"
           if (-not (Test-Path $patch)) { throw "Patch não encontrado: $patch" }
           if (Test-Path "$patch/build_patch_fix.py") {
@@ -71,6 +75,18 @@ jobs:
             throw "Gerador do Planilhador não encontrado em $patch"
           }
           if (-not (Test-Path "Planilhador.pyw")) { throw "Planilhador.pyw não foi gerado" }
+
+          @'
+          import os
+          from pathlib import Path
+          source = Path('Planilhador.pyw').read_text(encoding='utf-8')
+          expected = f'APP_VERSION = "{os.environ["VERSION"]}"'
+          if expected not in source:
+              raise SystemExit(f'VERSÃO INCORRETA NO CÓDIGO GERADO. Esperado: {expected}')
+          print('Versão confirmada no fonte:', os.environ['VERSION'])
+          '@ | Set-Content -Encoding UTF8 .verify_version.py
+          python .verify_version.py
+
           python -m py_compile Planilhador.pyw
           if (-not (Test-Path "$patch/Atualizador.pyw")) { throw "Atualizador.pyw não encontrado em $patch" }
           python -m py_compile "$patch/Atualizador.pyw"
@@ -80,6 +96,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           New-Item -ItemType Directory -Force bootstrap | Out-Null
           gh release download "v$env:BOOTSTRAP_VERSION" --repo "$env:GITHUB_REPOSITORY" --pattern "$env:BOOTSTRAP_ASSET" --dir bootstrap
           Expand-Archive -Path "bootstrap/$env:BOOTSTRAP_ASSET" -DestinationPath bootstrap/extracted -Force
@@ -92,12 +110,16 @@ jobs:
       - name: Instalar ferramentas de build
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           python -m pip install --upgrade pip
           python -m pip install pyinstaller pywin32
 
       - name: Gerar executáveis Windows
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           $configArg = "$env:RESOURCE_ROOT\config;config"
           $modelsArg = "$env:RESOURCE_ROOT\modelos;modelos"
           pyinstaller --noconfirm --clean --onefile --windowed --name Planilhador `
@@ -116,6 +138,7 @@ jobs:
       - name: Montar distribuição limpa
         shell: pwsh
         run: |
+          $ErrorActionPreference = "Stop"
           $folderName = "Planilhador_Equipamentos_v$env:VERSION"
           $cleanRoot = Join-Path "package_clean" $folderName
           $updateRoot = Join-Path "package_update" $folderName
@@ -128,7 +151,6 @@ jobs:
             Copy-Item "source_patch/$env:VERSION/LEIA-ME.txt" (Join-Path $root "LEIA-ME.txt") -Force
           }
 
-          # Ponte usada apenas por instalações Python antigas durante a migração automática.
           $shim = "source_patch/$env:VERSION/migration/Planilhador.pyw"
           if (Test-Path $shim) {
             Copy-Item $shim (Join-Path $updateRoot "Planilhador.pyw") -Force
@@ -153,6 +175,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          $ErrorActionPreference = "Stop"
+          $PSNativeCommandUseErrorActionPreference = $true
           $assets = @(
             $env:UPDATE_ASSET,
             "$env:UPDATE_ASSET.sha256",
