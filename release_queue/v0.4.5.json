@@ -1,0 +1,6 @@
+{
+  "version": "0.4.5",
+  "base_version": "0.4.4",
+  "base_asset": "Planilhador_Equipamentos_EXE_v0.4.4.zip",
+  "notes": "v0.4.5 — Lançamento mais compacto\n\n- Lote de trabalho e Leitura / bipagem agora ficam lado a lado, cada um ocupando aproximadamente metade da largura.\n- O lote ativo passa a ficar dentro do próprio quadro Lote de trabalho.\n- Status da leitura e Operadora ficam na mesma linha no quadro de bipagem.\n- Resumo do lote e Peças desta sessão sobem e ganham mais espaço vertical.\n- Campos de leitura ficam um pouco mais estreitos para acomodar melhor o novo layout em modo janela.\n- Mantém janela responsiva, atualizador robusto e todas as regras existentes de lotes, múltiplas operadoras, OneDrive, exportação, backup e diagnóstico."
+}
