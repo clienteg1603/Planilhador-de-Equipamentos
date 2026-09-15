@@ -1,0 +1,15 @@
+TESTE RÁPIDO - v0.3.2
+
+1. Atualize os dois PCs e confirme versão 0.3.2 em Configurações.
+2. Abra Configurações > Gerenciar cadastros.
+3. Confirme que KIT M1N 2.0, ADPlus e M2N continuam listados.
+4. Abra um equipamento e confira VIVO, CLARO, TIM, QUECTEL e ARQUIA com seus prefixos/tamanhos já existentes.
+5. Crie um equipamento de teste, salve e confirme que ele aparece no Lançamento.
+6. Cadastre duas operadoras diferentes no equipamento de teste.
+7. Associe um modelo Mestre/NF e um modelo de importação para uma das operadoras; confirme que os arquivos são copiados para DADOS_COMPARTILHADOS/catalogo_modelos.
+8. No outro PC, use Configurações > Recarregar compartilhado e confirme que o novo equipamento/operadoras aparecem.
+9. Em um lote misto, confirme que a Central mostra mais de uma operadora e que a conferência de exportação lista cada uma separadamente.
+10. Confirme que o Mestre/NF continua representando o lote inteiro.
+11. Confirme que a importação cria um arquivo separado por operadora presente.
+12. Se uma operadora presente estiver sem modelo de importação, confirme que a exportação é bloqueada antes de abrir o Excel.
+13. Teste bipagem normal, edição, desfazer, conflitos e contadores para garantir que nada regrediu.
