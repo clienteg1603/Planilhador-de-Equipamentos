@@ -90,6 +90,7 @@ jobs:
           python -m py_compile Planilhador.pyw
           if (-not (Test-Path "$patch/Atualizador.pyw")) { throw "Atualizador.pyw não encontrado em $patch" }
           python -m py_compile "$patch/Atualizador.pyw"
+          if (-not (Test-Path "Planilhador.ico")) { throw "Planilhador.ico não foi gerado" }
 
       - name: Obter recursos embutidos
         shell: pwsh
@@ -122,7 +123,12 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           $configArg = "$env:RESOURCE_ROOT\config;config"
           $modelsArg = "$env:RESOURCE_ROOT\modelos;modelos"
+          $iconArg = (Resolve-Path "Planilhador.ico").Path
+          $iconDataArg = "$iconArg;Planilhador.ico"
+
           pyinstaller --noconfirm --clean --onefile --windowed --name Planilhador `
+            --icon "$iconArg" `
+            --add-data "$iconDataArg" `
             --add-data "$configArg" `
             --add-data "$modelsArg" `
             --hidden-import win32com.client `
@@ -130,7 +136,11 @@ jobs:
             --hidden-import pywintypes `
             --hidden-import win32timezone `
             Planilhador.pyw
-          pyinstaller --noconfirm --clean --onefile --windowed --name Atualizador "source_patch/$env:VERSION/Atualizador.pyw"
+
+          pyinstaller --noconfirm --clean --onefile --windowed --name Atualizador `
+            --icon "$iconArg" `
+            "source_patch/$env:VERSION/Atualizador.pyw"
+
           if (-not (Test-Path "dist/Planilhador.exe")) { throw "Planilhador.exe não foi gerado" }
           if (-not (Test-Path "dist/Atualizador.exe")) { throw "Atualizador.exe não foi gerado" }
           Get-Item dist/Planilhador.exe, dist/Atualizador.exe | Select-Object Name, Length
