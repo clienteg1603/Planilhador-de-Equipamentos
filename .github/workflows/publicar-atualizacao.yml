@@ -10,18 +10,27 @@ on:
 permissions:
   contents: write
 
+env:
+  BOOTSTRAP_VERSION: "0.4.0"
+  BOOTSTRAP_ASSET: "Planilhador_Equipamentos_Update_v0.4.0.zip"
+
 jobs:
   publicar:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - name: Baixar repositório
         uses: actions/checkout@v4
 
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
       - name: Ler metadados da versão
-        shell: bash
+        shell: pwsh
         run: |
-          META=$(python - <<'PY'
-          import json, re
+          @'
+          import json, os, re
           from pathlib import Path
 
           items = []
@@ -31,92 +40,129 @@ jobs:
                   version = str(meta.get('version') or '')
                   nums = tuple(int(x) for x in re.findall(r'\d+', version))
                   if nums:
-                      items.append((nums, path))
+                      items.append((nums, path, meta))
               except Exception:
                   pass
           if not items:
               raise SystemExit('Nenhum metadado de versão válido encontrado em release_queue.')
           items.sort(key=lambda item: item[0])
-          print(items[-1][1].as_posix())
-          PY
-          )
-          python - "$META" <<'PY'
-          import json, os, sys
-          meta = json.load(open(sys.argv[1], encoding='utf-8'))
+          _, path, meta = items[-1]
           version = meta['version']
-          base_version = meta['base_version']
-          base_asset = meta['base_asset']
           with open(os.environ['GITHUB_ENV'], 'a', encoding='utf-8') as f:
               f.write(f"VERSION={version}\n")
               f.write(f"TAG=v{version}\n")
-              f.write(f"BASE_VERSION={base_version}\n")
-              f.write(f"BASE_ASSET={base_asset}\n")
-              f.write(f"ASSET=Planilhador_Equipamentos_Update_v{version}.zip\n")
-          with open('release_notes.md', 'w', encoding='utf-8') as f:
-              f.write(meta.get('notes', 'Atualização do Planilhador de Equipamentos'))
-          PY
+              f.write(f"UPDATE_ASSET=Planilhador_Equipamentos_Update_v{version}.zip\n")
+              f.write(f"EXE_ASSET=Planilhador_Equipamentos_EXE_v{version}.zip\n")
+          Path('release_notes.md').write_text(meta.get('notes', 'Atualização do Planilhador de Equipamentos'), encoding='utf-8')
+          print(f'Fila selecionada: {path} -> v{version}')
+          '@ | Set-Content -Encoding UTF8 .read_meta.py
+          python .read_meta.py
 
-      - name: Reconstruir e validar código alterado
-        shell: bash
+      - name: Reconstruir e validar código
+        shell: pwsh
         run: |
-          PATCH="source_patch/$VERSION"
-          test -d "$PATCH" || (echo "Patch não encontrado: $PATCH" && exit 1)
-
-          if [ -f "$PATCH/build_patch_fix.py" ]; then
-            python "$PATCH/build_patch_fix.py"
-          elif [ -f "$PATCH/build_patch.py" ]; then
-            python "$PATCH/build_patch.py"
-          else
-            PARTS=("$PATCH"/Planilhador.pyw.part*)
-            if [ ! -e "${PARTS[0]}" ]; then
-              echo "Partes do Planilhador.pyw não encontradas."
-              exit 1
-            fi
-            cat "${PARTS[@]}" > Planilhador.pyw
-          fi
-
-          test -f Planilhador.pyw || (echo "Planilhador.pyw não foi gerado" && exit 1)
+          $patch = "source_patch/$env:VERSION"
+          if (-not (Test-Path $patch)) { throw "Patch não encontrado: $patch" }
+          if (Test-Path "$patch/build_patch_fix.py") {
+            python "$patch/build_patch_fix.py"
+          } elseif (Test-Path "$patch/build_patch.py") {
+            python "$patch/build_patch.py"
+          } else {
+            throw "Gerador do Planilhador não encontrado em $patch"
+          }
+          if (-not (Test-Path "Planilhador.pyw")) { throw "Planilhador.pyw não foi gerado" }
           python -m py_compile Planilhador.pyw
-          if [ -f "$PATCH/config/equipamentos.json" ]; then
-            python -m json.tool "$PATCH/config/equipamentos.json" >/dev/null
-          fi
+          if (-not (Test-Path "$patch/Atualizador.pyw")) { throw "Atualizador.pyw não encontrado em $patch" }
+          python -m py_compile "$patch/Atualizador.pyw"
 
-      - name: Montar pacote de atualização
-        shell: bash
-        run: |
-          PATCH="source_patch/$VERSION"
-          BASE_URL="https://github.com/$GITHUB_REPOSITORY/releases/download/v$BASE_VERSION/$BASE_ASSET"
-          echo "Baixando base: $BASE_URL"
-          curl -fL "$BASE_URL" -o base.zip
-          rm -rf work
-          mkdir work
-          unzip -q base.zip -d work
-          ROOT=$(find work -mindepth 1 -maxdepth 1 -type d | head -n 1)
-          test -n "$ROOT" || (echo "Pasta raiz não encontrada no pacote base" && exit 1)
-          TARGET="work/Planilhador_Equipamentos_v$VERSION"
-          if [ "$ROOT" != "$TARGET" ]; then
-            mv "$ROOT" "$TARGET"
-          fi
-          cp -f Planilhador.pyw "$TARGET/Planilhador.pyw"
-          cp -f "$PATCH/LEIA-ME.txt" "$TARGET/LEIA-ME.txt"
-          cp -f "$PATCH/PUBLICAR_ATUALIZACAO_GITHUB.txt" "$TARGET/PUBLICAR_ATUALIZACAO_GITHUB.txt"
-          cp -f "$PATCH/TESTE_RAPIDO.txt" "$TARGET/TESTE_RAPIDO.txt"
-          cp -f "$PATCH/update_manifest.json" "$TARGET/update_manifest.json"
-          if [ -f "$PATCH/config/equipamentos.json" ]; then
-            mkdir -p "$TARGET/config"
-            cp -f "$PATCH/config/equipamentos.json" "$TARGET/config/equipamentos.json"
-          fi
-          (cd work && zip -qr "../$ASSET" "Planilhador_Equipamentos_v$VERSION")
-          sha256sum "$ASSET" | awk '{print $1 "  " ENVIRON["ASSET"]}' > "$ASSET.sha256"
-
-      - name: Publicar GitHub Release
-        shell: bash
+      - name: Obter recursos embutidos
+        shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$TAG" "$ASSET" "$ASSET.sha256" --clobber --repo "$GITHUB_REPOSITORY"
-            gh release edit "$TAG" --title "Planilhador de Equipamentos v$VERSION" --notes-file release_notes.md --repo "$GITHUB_REPOSITORY"
-          else
-            gh release create "$TAG" "$ASSET" "$ASSET.sha256" --repo "$GITHUB_REPOSITORY" --title "Planilhador de Equipamentos v$VERSION" --notes-file release_notes.md
-          fi
+          New-Item -ItemType Directory -Force bootstrap | Out-Null
+          gh release download "v$env:BOOTSTRAP_VERSION" --repo "$env:GITHUB_REPOSITORY" --pattern "$env:BOOTSTRAP_ASSET" --dir bootstrap
+          Expand-Archive -Path "bootstrap/$env:BOOTSTRAP_ASSET" -DestinationPath bootstrap/extracted -Force
+          $root = Get-ChildItem bootstrap/extracted -Directory | Select-Object -First 1
+          if (-not $root) { throw "Raiz do pacote base não encontrada" }
+          if (-not (Test-Path (Join-Path $root.FullName "config"))) { throw "config não encontrado no pacote base" }
+          if (-not (Test-Path (Join-Path $root.FullName "modelos"))) { throw "modelos não encontrado no pacote base" }
+          "RESOURCE_ROOT=$($root.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Instalar ferramentas de build
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller pywin32
+
+      - name: Gerar executáveis Windows
+        shell: pwsh
+        run: |
+          $configArg = "$env:RESOURCE_ROOT\config;config"
+          $modelsArg = "$env:RESOURCE_ROOT\modelos;modelos"
+          pyinstaller --noconfirm --clean --onefile --windowed --name Planilhador `
+            --add-data "$configArg" `
+            --add-data "$modelsArg" `
+            --hidden-import win32com.client `
+            --hidden-import pythoncom `
+            --hidden-import pywintypes `
+            --hidden-import win32timezone `
+            Planilhador.pyw
+          pyinstaller --noconfirm --clean --onefile --windowed --name Atualizador "source_patch/$env:VERSION/Atualizador.pyw"
+          if (-not (Test-Path "dist/Planilhador.exe")) { throw "Planilhador.exe não foi gerado" }
+          if (-not (Test-Path "dist/Atualizador.exe")) { throw "Atualizador.exe não foi gerado" }
+          Get-Item dist/Planilhador.exe, dist/Atualizador.exe | Select-Object Name, Length
+
+      - name: Montar distribuição limpa
+        shell: pwsh
+        run: |
+          $folderName = "Planilhador_Equipamentos_v$env:VERSION"
+          $cleanRoot = Join-Path "package_clean" $folderName
+          $updateRoot = Join-Path "package_update" $folderName
+          New-Item -ItemType Directory -Force $cleanRoot | Out-Null
+          New-Item -ItemType Directory -Force $updateRoot | Out-Null
+
+          foreach ($root in @($cleanRoot, $updateRoot)) {
+            Copy-Item dist/Planilhador.exe (Join-Path $root "Planilhador.exe") -Force
+            Copy-Item dist/Atualizador.exe (Join-Path $root "Atualizador.exe") -Force
+            Copy-Item "source_patch/$env:VERSION/LEIA-ME.txt" (Join-Path $root "LEIA-ME.txt") -Force
+          }
+
+          # Ponte usada apenas por instalações Python antigas durante a migração automática.
+          $shim = "source_patch/$env:VERSION/migration/Planilhador.pyw"
+          if (Test-Path $shim) {
+            Copy-Item $shim (Join-Path $updateRoot "Planilhador.pyw") -Force
+          }
+
+          Compress-Archive -Path $cleanRoot -DestinationPath $env:EXE_ASSET -CompressionLevel Optimal -Force
+          Compress-Archive -Path $updateRoot -DestinationPath $env:UPDATE_ASSET -CompressionLevel Optimal -Force
+
+          foreach ($asset in @($env:EXE_ASSET, $env:UPDATE_ASSET)) {
+            $hash = (Get-FileHash $asset -Algorithm SHA256).Hash.ToLower()
+            "$hash  $asset" | Set-Content -Encoding ascii "$asset.sha256"
+          }
+
+          Write-Host "Conteúdo da pasta limpa:"
+          Get-ChildItem $cleanRoot | Select-Object Name, Length
+          if ((Get-ChildItem $cleanRoot -File).Count -ne 3) {
+            throw "A distribuição limpa deve conter exatamente 3 arquivos."
+          }
+
+      - name: Publicar GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $assets = @(
+            $env:UPDATE_ASSET,
+            "$env:UPDATE_ASSET.sha256",
+            $env:EXE_ASSET,
+            "$env:EXE_ASSET.sha256"
+          )
+          gh release view $env:TAG --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $env:TAG @assets --clobber --repo $env:GITHUB_REPOSITORY
+            gh release edit $env:TAG --title "Planilhador de Equipamentos v$env:VERSION" --notes-file release_notes.md --repo $env:GITHUB_REPOSITORY
+          } else {
+            gh release create $env:TAG @assets --repo $env:GITHUB_REPOSITORY --title "Planilhador de Equipamentos v$env:VERSION" --notes-file release_notes.md
+          }
