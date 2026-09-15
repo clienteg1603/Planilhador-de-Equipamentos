@@ -1,0 +1,6 @@
+{
+  "version": "0.3.2",
+  "base_version": "0.3.1",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.3.1.zip",
+  "notes": "v0.3.2 — Etapa 7: equipamentos, operadoras e modelos\n\n- Adiciona gerenciador de cadastros em Configurações.\n- O catálogo personalizado é salvo em DADOS_COMPARTILHADOS e compartilhado entre os PCs.\n- Permite criar equipamentos e ajustar campos/tamanhos de SERIAL e SENHA.\n- ICCID permanece obrigatório e identifica a operadora automaticamente.\n- Permite adicionar, editar e remover operadoras por equipamento, configurando prefixo e tamanho de ICCID.\n- Permite escolher o modelo Mestre/NF e um modelo de importação próprio para cada operadora.\n- Modelos escolhidos são copiados para DADOS_COMPARTILHADOS/catalogo_modelos e não entram no pacote público do GitHub.\n- Suporta normalmente várias operadoras no mesmo lote: uma planilha Mestre/NF para o lote inteiro e importações separadas por operadora presente.\n- A pré-exportação exige modelo apenas das operadoras realmente presentes no lote.\n- Adiciona Recarregar compartilhado para atualizar os cadastros nos outros PCs sem precisar reinstalar.\n- Mantém todas as proteções de OneDrive, conflitos, edição, usuários, Central e histórico de exportações das versões anteriores."
+}
