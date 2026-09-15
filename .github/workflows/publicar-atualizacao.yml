@@ -183,8 +183,15 @@ jobs:
             $env:EXE_ASSET,
             "$env:EXE_ASSET.sha256"
           )
+
+          # "gh release view" retorna 1 quando a Release ainda não existe; isso
+          # é esperado e não pode abortar a publicação.
+          $PSNativeCommandUseErrorActionPreference = $false
           gh release view $env:TAG --repo $env:GITHUB_REPOSITORY *> $null
-          if ($LASTEXITCODE -eq 0) {
+          $releaseExists = ($LASTEXITCODE -eq 0)
+          $PSNativeCommandUseErrorActionPreference = $true
+
+          if ($releaseExists) {
             gh release upload $env:TAG @assets --clobber --repo $env:GITHUB_REPOSITORY
             gh release edit $env:TAG --title "Planilhador de Equipamentos v$env:VERSION" --notes-file release_notes.md --repo $env:GITHUB_REPOSITORY
           } else {
