@@ -1,0 +1,6 @@
+{
+  "version": "0.3.3",
+  "base_version": "0.3.2",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.3.2.zip",
+  "notes": "v0.3.3 — Etapa 8: polimento visual\n\n- Padroniza tipografia, espaçamento, guias, quadros, tabelas e botões nas três áreas do programa.\n- O cabeçalho passa a mostrar versão, usuário ativo e estado do compartilhamento de forma mais limpa.\n- Lançamento ganha hierarquia visual mais clara com Lote de trabalho, Leitura / bipagem e cabeçalho Peças desta sessão.\n- Ações principais, secundárias e de atenção passam a ter estilos consistentes.\n- A Central preserva filtros e regras, mas destaca melhor consulta, exportação, finalização e conflitos.\n- Configurações ganha cabeçalho e orientação mais clara.\n- O gerenciador de equipamentos, operadoras e modelos também recebe ajustes de consistência visual.\n- Mantém integralmente salvamento automático, edição, conflitos/OneDrive, usuários, exportação e suporte a várias operadoras no mesmo lote."
+}
