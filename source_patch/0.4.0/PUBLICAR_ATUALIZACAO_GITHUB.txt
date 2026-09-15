@@ -1,0 +1,14 @@
+PUBLICAÇÃO v0.4.0
+
+A publicação é automática pelo GitHub Actions quando release_queue/v0.4.0.json entra na branch main.
+
+Base: v0.3.5
+Pacote esperado: Planilhador_Equipamentos_Update_v0.4.0.zip
+
+A automação deve:
+- reconstruir Planilhador.pyw pela cadeia de patches;
+- validar com py_compile;
+- montar o pacote usando a Release v0.3.5 como base;
+- substituir os arquivos da v0.4.0;
+- gerar SHA-256;
+- publicar a Release v0.4.0.
