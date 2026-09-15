@@ -1,0 +1,6 @@
+{
+  "version": "0.4.0",
+  "base_version": "0.3.5",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.3.5.zip",
+  "notes": "v0.4.0 — Etapa 10: consolidação\n\n- Adiciona Backup e recuperação em Configurações.\n- Criar backup agora salva uma cópia local de lotes, usuários, catálogo compartilhado e modelos personalizados.\n- Locks e arquivos temporários não entram no backup.\n- O backup fica fora de DADOS_COMPARTILHADOS, reduzindo o risco de uma exclusão sincronizada apagar também a cópia de segurança.\n- Recuperar backup nunca sobrescreve diretamente a pasta atual: os dados são extraídos para uma NOVA pasta.\n- Após a recuperação, o usuário pode apontar este PC para a nova pasta e depois configurar os demais PCs para o mesmo local.\n- O ZIP de backup contém BACKUP_MANIFEST.json para validação.\n- Mantém diagnóstico, fingerprint de exportação, proteção pós-finalização, conflitos OneDrive, edição, usuários, catálogo compartilhado e lotes com várias operadoras.\n- Consolida a linha 0.3.x em uma base mais madura para a próxima fase do programa."
+}
