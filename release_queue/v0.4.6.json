@@ -1,0 +1,6 @@
+{
+  "version": "0.4.6",
+  "base_version": "0.4.5",
+  "base_asset": "Planilhador_Equipamentos_EXE_v0.4.5.zip",
+  "notes": "v0.4.6 — Ícone oficial da pena azul\n\n- A pena azul escolhida passa a ser o ícone oficial do Planilhador.\n- O mesmo ícone é embutido em Planilhador.exe e Atualizador.exe.\n- A janela principal usa o mesmo ícone na barra de título e na barra de tarefas.\n- Atalhos que apontam para o Planilhador.exe usam o ícone do próprio executável.\n- O processo de build passa a reconstruir e embutir o ícone automaticamente nas próximas versões.\n- Mantém o layout horizontal do Lançamento e todas as regras existentes."
+}
