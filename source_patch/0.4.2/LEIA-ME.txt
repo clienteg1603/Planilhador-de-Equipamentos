@@ -1,0 +1,31 @@
+PLANILHADOR DE EQUIPAMENTOS — v0.4.2
+
+Esta versão mantém a distribuição limpa em EXE:
+
+- Planilhador.exe
+- Atualizador.exe
+- LEIA-ME.txt
+
+NOVIDADE DA v0.4.2
+
+A janela principal agora se adapta automaticamente ao monitor.
+
+- Detecta a área útil do monitor onde a janela está aberta.
+- Inicia maximizada no Windows.
+- Ao restaurar para modo janela, usa um tamanho calculado para caber no monitor.
+- Não deixa a janela restaurada ultrapassar a área útil/tarefa do Windows.
+- Se a janela for movida para outro monitor menor, o tamanho é ajustado sem reconstruir a tela.
+- A aba Configurações ganhou rolagem vertical para telas com pouca altura.
+- A tabela Peças desta sessão continua ocupando a área expansível da tela.
+
+DADOS
+
+Os dados compartilhados, usuários, lotes, backups, catálogo personalizado e modelos personalizados permanecem fora do executável e não são apagados por atualizações.
+
+EXPORTAÇÃO
+
+A exportação de planilhas exige Windows com Microsoft Excel instalado.
+
+ATUALIZAÇÕES
+
+Use Configurações > Verificar agora.
