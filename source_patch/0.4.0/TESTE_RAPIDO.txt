@@ -1,0 +1,16 @@
+TESTE RÁPIDO — v0.4.0
+
+1. Abra Configurações > Backup e recuperação.
+2. Clique em Criar backup agora e confirme se o ZIP é criado.
+3. Use Abrir pasta de backups e confirme se o arquivo aparece.
+4. Abra o ZIP e confirme a presença de BACKUP_MANIFEST.json.
+5. Confirme que .lock e arquivos .tmp não foram incluídos.
+6. Use Recuperar backup... e escolha uma pasta vazia/pai de destino.
+7. Confirme que o programa cria uma NOVA pasta Planilhador_Recuperado_...
+8. Escolha não trocar a pasta compartilhada e confirme que os dados atuais continuam intactos.
+9. Repita a recuperação e aceite apontar este PC para a pasta recuperada; confira Central, usuários e catálogo.
+10. Execute Diagnóstico e robustez na pasta recuperada.
+11. Teste bipagem, edição e exclusão de uma peça.
+12. Teste exportação de um lote e confirme que a validação/fingerprint continuam funcionando.
+13. Em lote misto, confirme que cada peça mantém sua operadora e que a exportação separa as importações por operadora.
+14. Nos dois PCs, confirme que ambos apontam para a mesma pasta antes de retomar produção real.
