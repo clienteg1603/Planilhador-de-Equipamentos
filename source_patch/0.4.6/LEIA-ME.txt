@@ -1,0 +1,18 @@
+PLANILHADOR DE EQUIPAMENTOS v0.4.6
+
+Alteração principal desta versão:
+- A pena azul escolhida passa a ser o ícone oficial do Planilhador.
+- O mesmo ícone é embutido no Planilhador.exe e no Atualizador.exe.
+- A janela principal usa o mesmo ícone na barra de título e na barra de tarefas.
+- Atalhos que apontarem para o Planilhador.exe passam a usar o ícone do próprio executável.
+- O ícone é gerado automaticamente durante cada build para continuar presente nas próximas versões.
+
+Mantidos:
+- layout horizontal do Lançamento;
+- salvamento automático por peça;
+- múltiplas operadoras no mesmo lote;
+- edição, exclusão e desfazer;
+- OneDrive e proteção de conflitos;
+- exportação, backup e diagnóstico;
+- janela responsiva;
+- Atualizador.exe robusto.
