@@ -1,0 +1,15 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.3.3.1
+
+HOTFIX DE LAYOUT
+
+- Corrige a tela de Lançamento em monitores com menor altura útil, especialmente perto de 864 px.
+- A tabela Peças desta sessão volta a permanecer visível na mesma tela.
+- Contagem e Última peça foram reunidas em um único quadro mais compacto.
+- Os botões Editar, Excluir e Desfazer última ficam na mesma barra do título da tabela.
+- A tabela passa a ocupar a área expansível da janela e ganhou barra de rolagem vertical.
+- Cabeçalho, abas e margens foram levemente compactados sem retirar informações importantes.
+- Não altera regras de bipagem, salvamento automático, edição, conflitos, exportação ou suporte a várias operadoras.
+
+ATUALIZAÇÕES
+- Repositório oficial: clienteg1603/Planilhador-de-Equipamentos
+- Use Configurações > Verificar agora para instalar a versão mais recente.
