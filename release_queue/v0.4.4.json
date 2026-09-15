@@ -1,0 +1,6 @@
+{
+  "version": "0.4.4",
+  "base_version": "0.4.1",
+  "base_asset": "Planilhador_Equipamentos_EXE_v0.4.1.zip",
+  "notes": "v0.4.4 — Correção real do build responsivo e do atualizador\n\n- Corrige o erro de publicação que fazia os pacotes v0.4.2/v0.4.3 conterem um Planilhador.exe ainda na v0.4.1.\n- O workflow agora interrompe imediatamente se qualquer gerador Python falhar.\n- Antes de compilar, o workflow confere explicitamente se APP_VERSION corresponde à versão da Release.\n- Inclui de fato a janela responsiva ao monitor: abertura maximizada, tamanho restaurado calculado e limite pela área útil do monitor.\n- Configurações mantém rolagem vertical em telas menores.\n- Atualizador.exe robusto com repetição para arquivos bloqueados, conferência SHA-256 e proteção contra loop de atualização.\n- Mantém distribuição limpa com Planilhador.exe, Atualizador.exe e LEIA-ME.txt."
+}
