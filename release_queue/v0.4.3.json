@@ -1,0 +1,6 @@
+{
+  "version": "0.4.3",
+  "base_version": "0.4.2",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.4.2.zip",
+  "notes": "v0.4.3 — Hotfix do atualizador\n\n- Corrige o ciclo em que o Planilhador reiniciava mas continuava na versão antiga.\n- O Atualizador.exe passa a aguardar locks residuais do Windows/PyInstaller e repetir a substituição por até alguns segundos.\n- O executável instalado é conferido por SHA-256 antes de reiniciar.\n- Falhas de atualização são registradas em %LOCALAPPDATA%\\PlanilhadorEquipamentos\\update_state.json.\n- Uma versão que falhou não é oferecida automaticamente em todo início; uma nova tentativa continua disponível em Configurações > Verificar agora.\n- Em caso de falha, a instalação anterior é preservada/restaurada sempre que possível.\n- Mantém a janela responsiva ao monitor introduzida na v0.4.2.\n- Para instalações presas na v0.4.1, recomenda-se substituir manualmente Planilhador.exe e Atualizador.exe uma única vez pelo pacote EXE v0.4.3; as atualizações seguintes voltam a funcionar pelo próprio programa."
+}
