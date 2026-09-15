@@ -1,0 +1,19 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.3.5
+
+ETAPA 9 - ROBUSTEZ E DIAGNÓSTICO
+
+- Exportação e finalização agora verificam a integridade física dos arquivos JSON do lote.
+- Arquivo de envio corrompido, ilegível ou com estrutura inconsistente bloqueia exportação/finalização em vez de ser ignorado silenciosamente.
+- Cada exportação válida passa a guardar uma assinatura (fingerprint) do conteúdo exportado.
+- A finalização compara o conteúdo atual com a última exportação; mudar uma peça sem mudar a quantidade também exige nova exportação.
+- Após o Excel gerar os arquivos, o programa confere novamente o lote. Se o OneDrive trouxer alteração nesse intervalo, os arquivos não são marcados como exportação válida.
+- Configurações ganhou Executar diagnóstico.
+- O diagnóstico verifica escrita/leitura na pasta compartilhada, JSONs, conflitos, revisões de sincronização, alterações pós-finalização, locks antigos e modelos de exportação.
+- O diagnóstico nunca apaga ou corrige dados automaticamente.
+- A fotografia da finalização continua registrando quantidade, fingerprint e assinaturas dos arquivos de envio.
+- A automação de publicação no GitHub passou a escolher a maior versão numericamente, evitando erro de ordenação com versões intermediárias.
+
+IMPORTANTE SOBRE ONEDRIVE
+- A pasta OneDrive continua sendo sincronização de arquivos, não um banco de dados em tempo real.
+- O diagnóstico mostra o estado que já chegou ao computador atual. Um arquivo ainda aguardando sincronização em outro PC não pode ser detectado antes de chegar.
+- Por isso conflitos sincronizados continuam sendo tratados de forma explícita, sem apagar dados automaticamente.
