@@ -1,0 +1,17 @@
+PLANILHADOR DE EQUIPAMENTOS v0.4.5
+
+Alteração principal desta versão:
+- A tela Lançamento foi reorganizada para aproveitar melhor a largura da janela.
+- Lote de trabalho ocupa a metade esquerda do topo.
+- Leitura / bipagem ocupa a metade direita do topo.
+- Resumo do lote e Peças desta sessão sobem, deixando mais área útil para a tabela.
+- Os campos de leitura foram levemente estreitados para caber melhor também em modo janela.
+
+Mantidos:
+- salvamento automático por peça;
+- múltiplas operadoras no mesmo lote;
+- edição, exclusão e desfazer;
+- OneDrive e proteção de conflitos;
+- exportação, backup e diagnóstico;
+- janela responsiva;
+- Atualizador.exe robusto.
