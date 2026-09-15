@@ -1,0 +1,10 @@
+TESTE RÁPIDO - v0.3.4
+
+1. Abrir o programa em resolução/altura semelhante a 864 px.
+2. Confirmar que Peças desta sessão fica visível.
+3. Confirmar espaço para várias linhas e rolagem vertical.
+4. Abrir um lote e bipar uma peça; ela deve aparecer imediatamente na tabela.
+5. Confirmar Contagem, Última peça, Editar, Excluir e Desfazer última.
+6. Dar duplo clique em uma linha e confirmar a edição.
+7. Confirmar que o foco da bipagem volta ao primeiro campo após salvar.
+8. Conferir Central e Configurações para garantir que as demais funções permanecem normais.
