@@ -1,0 +1,19 @@
+PLANILHADOR DE EQUIPAMENTOS - v0.3.2
+
+ETAPA 7 - EQUIPAMENTOS, OPERADORAS E MODELOS
+
+- Configurações > Equipamentos, operadoras e modelos ganhou um gerenciador de cadastros.
+- O catálogo personalizado fica em DADOS_COMPARTILHADOS/configuracao/equipamentos.json e não é substituído pelas atualizações do programa.
+- É possível criar novos equipamentos e ajustar nome, campos SERIAL/SENHA e seus tamanhos.
+- ICCID permanece obrigatório, pois é usado para identificar a operadora automaticamente.
+- Para cada equipamento é possível adicionar, editar ou remover operadoras, configurando prefixo e tamanho do ICCID.
+- O modelo Mestre/NF pode ser escolhido pelo programa e é copiado para DADOS_COMPARTILHADOS/catalogo_modelos.
+- Cada operadora pode ter seu próprio modelo de importação, também armazenado na pasta compartilhada.
+- Um lote pode conter várias operadoras ao mesmo tempo. O Mestre/NF usa todos os registros do lote e a importação de chip é separada por operadora.
+- A conferência de exportação continua exigindo modelo apenas para as operadoras que realmente aparecem naquele lote.
+- Outros PCs podem usar Configurações > Recarregar compartilhado após uma alteração, ou simplesmente reabrir o programa.
+- Os equipamentos e modelos originais continuam funcionando como padrão quando ainda não existe catálogo compartilhado personalizado.
+
+ATUALIZAÇÕES
+- Repositório oficial: clienteg1603/Planilhador-de-Equipamentos
+- O programa verifica a Release mais recente em Configurações > Verificar agora.
