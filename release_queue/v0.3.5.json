@@ -1,0 +1,6 @@
+{
+  "version": "0.3.5",
+  "base_version": "0.3.4",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.3.4.zip",
+  "notes": "v0.3.5 — Etapa 9: robustez e diagnóstico\n\n- Exportação e finalização verificam a integridade física dos JSONs do lote.\n- Arquivos corrompidos, ilegíveis ou estruturalmente inconsistentes bloqueiam operações críticas em vez de serem ignorados.\n- Cada exportação válida grava fingerprint do conteúdo exportado.\n- A finalização compara o conteúdo atual com a última exportação, inclusive quando a quantidade permanece igual.\n- Após o Excel gerar as planilhas, o lote é conferido novamente; se o OneDrive trouxer alteração nesse intervalo, a exportação não é marcada como válida.\n- Configurações ganhou Executar diagnóstico para verificar escrita/leitura, JSONs, conflitos, revisões de sincronização, alterações pós-finalização, locks antigos e modelos de exportação.\n- O diagnóstico não apaga nem corrige dados automaticamente.\n- A automação de publicação passou a escolher a maior versão numericamente, evitando erro de ordenação textual.\n- Mantém bipagem automática, edição, usuários, Central, catálogo compartilhado e suporte a várias operadoras no mesmo lote."
+}
