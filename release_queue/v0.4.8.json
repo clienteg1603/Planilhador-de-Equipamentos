@@ -1,0 +1,6 @@
+{
+  "version": "0.4.8",
+  "base_version": "0.4.5",
+  "base_asset": "Planilhador_Equipamentos_EXE_v0.4.5.zip",
+  "notes": "v0.4.8 — Ícone azul do Tk restaurado\n\n- Volta ao comportamento da v0.4.5 para o ícone, que já aparecia corretamente como a pena azul aprovada.\n- Remove os overrides de ícone e AppUserModelID introduzidos depois.\n- O programa continua abrindo em modo janela, centralizado e dentro da área útil do monitor.\n- Mantém o layout horizontal do Lançamento e todas as regras existentes."
+}
