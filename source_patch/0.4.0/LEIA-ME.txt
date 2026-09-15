@@ -1,0 +1,26 @@
+PLANILHADOR DE EQUIPAMENTOS — v0.4.0
+
+Etapa 10 — Consolidação
+
+Principais mudanças:
+- Nova área Backup e recuperação em Configurações.
+- Criar backup agora salva uma cópia local dos dados compartilhados deste programa.
+- O backup inclui lotes, usuários, catálogo compartilhado e modelos personalizados.
+- Locks e arquivos temporários não entram no backup.
+- Os backups ficam fora de DADOS_COMPARTILHADOS, em uma pasta local do Planilhador neste computador.
+- Recuperar backup nunca sobrescreve diretamente a pasta compartilhada atual: os dados são extraídos para uma NOVA pasta.
+- Depois da recuperação, o programa pode apontar este PC para a nova pasta, se o usuário confirmar.
+- Os outros PCs precisam apontar para a mesma pasta recuperada antes de ela virar a nova base de produção.
+- Diagnóstico e proteções de integridade da v0.3.5 continuam ativos.
+- A tela de Lançamento mantém a correção de layout da v0.3.4.
+- Lotes com várias operadoras continuam suportados normalmente.
+
+Recomendação de recuperação:
+1. Feche o Planilhador nos outros computadores.
+2. Use Configurações > Backup e recuperação > Recuperar backup.
+3. Escolha uma pasta nova, preferencialmente dentro da área compartilhada/OneDrive que será usada pelos PCs.
+4. Confira os dados recuperados.
+5. Aponte todos os PCs para a mesma pasta recuperada antes de retomar a produção.
+
+Observação:
+Backup local não substitui a sincronização do OneDrive nem o histórico do próprio OneDrive. Ele é uma camada adicional de segurança para recuperação manual e controlada.
