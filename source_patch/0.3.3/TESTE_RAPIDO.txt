@@ -1,0 +1,13 @@
+TESTE RÁPIDO - v0.3.3
+
+1. Abra o programa e confirme o novo cabeçalho com versão e usuário.
+2. Em Lançamento, confirme Lote de trabalho, Leitura / bipagem e o cabeçalho Peças desta sessão.
+3. Bipe uma peça completa e confirme que o foco, salvamento automático e contadores continuam funcionando.
+4. Dê duplo clique em uma peça e confirme a edição.
+5. Teste Desfazer última peça e Excluir selecionada.
+6. Abra a Central e confira filtros, ordenação e habilitação dos botões.
+7. Abra um lote com conflito e confirme que Exportar/Finalizar continuam bloqueados.
+8. Abra Configurações e confirme os blocos Pasta compartilhada, Atualizações e Cadastros.
+9. Abra Gerenciar cadastros e confira equipamentos/operadoras/modelos.
+10. Em lote misto, confirme que a pré-exportação lista cada operadora separadamente.
+11. No Windows com Excel instalado, faça uma exportação VIVO já conhecida para garantir que o polimento visual não afetou a geração dos arquivos.
