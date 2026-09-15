@@ -1,0 +1,21 @@
+PLANILHADOR DE EQUIPAMENTOS v0.4.3
+
+Hotfix do sistema de atualização.
+
+CORREÇÕES PRINCIPAIS
+- O Atualizador.exe agora aguarda locks residuais do Windows/PyInstaller antes de substituir o executável.
+- O arquivo instalado é conferido por SHA-256 antes do programa reiniciar.
+- Se a atualização falhar, o motivo é registrado em %LOCALAPPDATA%\PlanilhadorEquipamentos\update_state.json.
+- Uma atualização que falhou deixa de ser oferecida automaticamente em todo início; ela pode ser tentada novamente manualmente em Configurações > Verificar agora.
+- Mantém a janela responsiva ao monitor da v0.4.2.
+
+IMPORTANTE PARA QUEM ESTÁ PRESO NA v0.4.1
+Como o defeito está justamente no Atualizador.exe da v0.4.1, faça uma única migração manual para a v0.4.3:
+1. Feche totalmente o Planilhador.
+2. Extraia o pacote Planilhador_Equipamentos_EXE_v0.4.3.zip.
+3. Copie Planilhador.exe e Atualizador.exe para a pasta atual do programa, substituindo os dois arquivos.
+4. Abra Planilhador.exe.
+
+DADOS_COMPARTILHADOS, usuários, lotes, backups e configurações locais não devem ser apagados.
+
+A exportação de Excel continua exigindo Microsoft Excel instalado no Windows.
