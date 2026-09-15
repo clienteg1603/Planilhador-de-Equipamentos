@@ -90,7 +90,6 @@ jobs:
           python -m py_compile Planilhador.pyw
           if (-not (Test-Path "$patch/Atualizador.pyw")) { throw "Atualizador.pyw não encontrado em $patch" }
           python -m py_compile "$patch/Atualizador.pyw"
-          if (-not (Test-Path "Planilhador.ico")) { throw "Planilhador.ico não foi gerado" }
 
       - name: Obter recursos embutidos
         shell: pwsh
@@ -123,12 +122,10 @@ jobs:
           $PSNativeCommandUseErrorActionPreference = $true
           $configArg = "$env:RESOURCE_ROOT\config;config"
           $modelsArg = "$env:RESOURCE_ROOT\modelos;modelos"
-          $iconArg = (Resolve-Path "Planilhador.ico").Path
-          $iconDataArg = "$iconArg;Planilhador.ico"
 
+          # Sem --icon: preserva o ícone padrão azul do Tk, que é o visual
+          # aprovado pelo usuário e já aparecia corretamente antes da v0.4.6.
           pyinstaller --noconfirm --clean --onefile --windowed --name Planilhador `
-            --icon "$iconArg" `
-            --add-data "$iconDataArg" `
             --add-data "$configArg" `
             --add-data "$modelsArg" `
             --hidden-import win32com.client `
@@ -138,7 +135,6 @@ jobs:
             Planilhador.pyw
 
           pyinstaller --noconfirm --clean --onefile --windowed --name Atualizador `
-            --icon "$iconArg" `
             "source_patch/$env:VERSION/Atualizador.pyw"
 
           if (-not (Test-Path "dist/Planilhador.exe")) { throw "Planilhador.exe não foi gerado" }
@@ -194,8 +190,6 @@ jobs:
             "$env:EXE_ASSET.sha256"
           )
 
-          # "gh release view" retorna 1 quando a Release ainda não existe; isso
-          # é esperado e não pode abortar a publicação.
           $PSNativeCommandUseErrorActionPreference = $false
           gh release view $env:TAG --repo $env:GITHUB_REPOSITORY *> $null
           $releaseExists = ($LASTEXITCODE -eq 0)
