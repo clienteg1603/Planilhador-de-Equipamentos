@@ -20,11 +20,26 @@ jobs:
       - name: Ler metadados da versão
         shell: bash
         run: |
-          META=$(find release_queue -maxdepth 1 -name '*.json' -type f | sort | tail -n 1)
-          if [ -z "$META" ]; then
-            echo "Nenhum metadado de versão encontrado em release_queue."
-            exit 1
-          fi
+          META=$(python - <<'PY'
+          import json, re
+          from pathlib import Path
+
+          items = []
+          for path in Path('release_queue').glob('*.json'):
+              try:
+                  meta = json.loads(path.read_text(encoding='utf-8'))
+                  version = str(meta.get('version') or '')
+                  nums = tuple(int(x) for x in re.findall(r'\d+', version))
+                  if nums:
+                      items.append((nums, path))
+              except Exception:
+                  pass
+          if not items:
+              raise SystemExit('Nenhum metadado de versão válido encontrado em release_queue.')
+          items.sort(key=lambda item: item[0])
+          print(items[-1][1].as_posix())
+          PY
+          )
           python - "$META" <<'PY'
           import json, os, sys
           meta = json.load(open(sys.argv[1], encoding='utf-8'))
