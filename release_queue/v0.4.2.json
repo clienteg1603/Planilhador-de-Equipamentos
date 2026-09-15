@@ -1,0 +1,6 @@
+{
+  "version": "0.4.2",
+  "base_version": "0.4.1",
+  "base_asset": "Planilhador_Equipamentos_Update_v0.4.1.zip",
+  "notes": "v0.4.2 — Janela responsiva ao monitor\n\n- Detecta a área útil do monitor atual no Windows, respeitando a barra de tarefas.\n- A janela principal inicia maximizada.\n- Ao restaurar para modo janela, usa um tamanho calculado para caber no monitor sem cortar conteúdo.\n- Se a janela normal for movida para outro monitor menor, ela é limitada à nova área útil sem reconstruir a interface.\n- O tamanho mínimo deixa de ser fixo e passa a se adaptar ao monitor.\n- A aba Configurações ganhou rolagem vertical para evitar cortes em telas com pouca altura.\n- A tabela Peças desta sessão continua como área expansível da tela.\n- Mantém distribuição EXE limpa, atualizador, backup, diagnóstico, OneDrive, exportação e lotes com várias operadoras."
+}
